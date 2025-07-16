@@ -78,7 +78,7 @@ const CurrencyConverter = () => {
 
   return (
     <div className="w-full max-w-md mx-auto bg-white bg-opacity-5 rounded-xl p-6 backdrop-blur-sm">
-      <h2 className="font-heading text-xl mb-6 text-center">Currency Converter</h2>
+      {/* <h2 className="font-heading text-xl mb-6 text-center">Currency Converter</h2> */}
       
       {error && (
         <div className="mb-4 p-3 bg-accent-1 bg-opacity-20 rounded-lg text-center">
