@@ -20,11 +20,12 @@ const Home = () => {
           <DynamicText 
             className="font-heading text-xl sm:text-2xl md:text-4xl lg:text-6xl text-accent-1 min-h-[60px] sm:min-h-[80px] flex items-center justify-center px-2"
             texts={[
-              "雷雷雷",
+              "高松燈 GuGu GaGa",
               "大黑暗",
               "RANDOM STUFF",
-              "高松燈 GuGu GaGa",
-              "她他啊您"
+              "雷雷雷",
+              "ECLIPSE",
+              "RING"
             ]}
             interval={5000}
           />
