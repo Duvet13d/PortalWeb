@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom global styles */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #000000;
+    color: #ffffff;
+    font-family: 'IBM Plex Sans JP', sans-serif;
+    overflow-x: hidden;
+  }
+  
+  @font-face {
+    font-family: 'MantouSans-Regular';
+    src: url('fonts/MantouSans-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Dela Gothic One', cursive;
+    text-transform: uppercase;
+  }
+}
+
+/* Delete arrow from input type number */
+@layer utilities {
+  .text-stroke {
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.5);
+  }
+} 
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Delete arrow from input type number Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
