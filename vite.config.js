@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   // Set base path for GitHub Pages deployment
   // Replace 'personal-portal' with your actual repository name
-  base: process.env.NODE_ENV === 'production' ? '/PortalWeb/' : '/',
+  base: "https://duvet13d.github.io/PortalWeb/",
   server: {
     port: 3000,
     open: true
