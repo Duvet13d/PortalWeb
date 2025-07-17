@@ -3,6 +3,12 @@ import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Logo from './Logo'
 
+const navLinks = [
+  { name: 'Home', path: './' },
+  { name: 'Tools', path: './tools' },
+  { name: 'Links', path: './links' },
+]
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
@@ -21,36 +27,19 @@ const Header = () => {
         
         {/* Desktop Navigation */}
         <nav className="hidden md:flex space-x-6 lg:space-x-8">
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              `font-heading text-base lg:text-lg transition-colors duration-300 ${
-                isActive ? 'text-accent-1' : 'text-white hover:text-accent-2'
-              }`
-            }
-          >
-            HOME
-          </NavLink>
-          <NavLink
-            to="/tools"
-            className={({ isActive }) =>
-              `font-heading text-base lg:text-lg transition-colors duration-300 ${
-                isActive ? 'text-accent-1' : 'text-white hover:text-accent-2'
-              }`
-            }
-          >
-            TOOLS
-          </NavLink>
-          <NavLink
-            to="/links"
-            className={({ isActive }) =>
-              `font-heading text-base lg:text-lg transition-colors duration-300 ${
-                isActive ? 'text-accent-1' : 'text-white hover:text-accent-2'
-              }`
-            }
-          >
-            LINKS
-          </NavLink>
+          {navLinks.map((link) => (
+            <NavLink
+              key={link.name}
+              to={link.path}
+              className={({ isActive }) =>
+                `font-heading text-base lg:text-lg transition-colors duration-300 ${
+                  isActive ? 'text-accent-1' : 'text-white hover:text-accent-2'
+                }`
+              }
+            >
+              {link.name}
+            </NavLink>
+          ))}
         </nav>
 
         {/* Hamburger Menu Button */}
@@ -75,39 +64,23 @@ const Header = () => {
             transition={{ duration: 0.3 }}
             className="fixed inset-0 z-30 bg-black bg-opacity-95 flex flex-col justify-center items-center space-y-8"
           >
-            <NavLink
-              to="/"
-              onClick={closeMenu}
-              className={({ isActive }) =>
-                `font-heading text-3xl transition-colors duration-300 ${
-                  isActive ? 'text-accent-1' : 'text-white hover:text-accent-2'
-                }`
-              }
-            >
-              HOME
-            </NavLink>
-            <NavLink
-              to="/tools"
-              onClick={closeMenu}
-              className={({ isActive }) =>
-                `font-heading text-3xl transition-colors duration-300 ${
-                  isActive ? 'text-accent-1' : 'text-white hover:text-accent-2'
-                }`
-              }
-            >
-              TOOLS
-            </NavLink>
-            <NavLink
-              to="/links"
-              onClick={closeMenu}
-              className={({ isActive }) =>
-                `font-heading text-3xl transition-colors duration-300 ${
-                  isActive ? 'text-accent-1' : 'text-white hover:text-accent-2'
-                }`
-              }
-            >
-              LINKS
-            </NavLink>
+            <ul className="flex flex-col items-center justify-center h-full gap-8">
+              {navLinks.map((link) => (
+                <li key={link.name}>
+                  <NavLink
+                    to={link.path}
+                    onClick={closeMenu}
+                    className={({ isActive }) =>
+                      `font-heading text-3xl transition-colors duration-300 ${
+                        isActive ? 'text-accent-1' : 'text-white hover:text-accent-2'
+                      }`
+                    }
+                  >
+                    {link.name}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
           </motion.div>
         )}
       </AnimatePresence>
