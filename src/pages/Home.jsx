@@ -25,7 +25,8 @@ const Home = () => {
               "RANDOM STUFF",
               "雷雷雷",
               "ECLIPSE",
-              "RING"
+              "RING",
+              "DREAM"
             ]}
             interval={5000}
           />
