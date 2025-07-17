@@ -104,6 +104,32 @@ base: process.env.NODE_ENV === 'production' ? '/my-portal/' : '/',
 - Clear browser cache
 - Check that files exist in the `gh-pages` branch
 
+### Issue: JSX MIME type error
+
+**Error**: `Loading module from "https://username.github.io/repo/src/main.jsx" was blocked because of a disallowed MIME type ("text/jsx")`
+
+**Solution**:
+1. **Clean and rebuild**:
+   ```bash
+   # Windows PowerShell
+   Remove-Item -Path "dist" -Recurse -Force
+   npm run build
+   npm run deploy
+   
+   # macOS/Linux
+   rm -rf dist
+   npm run build
+   npm run deploy
+   ```
+
+2. **Clear browser cache**:
+   - Hard refresh: `Ctrl+Shift+R` (Windows) or `Cmd+Shift+R` (Mac)
+   - Or open developer tools → Network tab → check "Disable cache"
+
+3. **Verify build output**:
+   - Check that `dist/index.html` references `/RepositoryName/assets/index-[hash].js`
+   - NOT `/RepositoryName/src/main.jsx`
+
 ### Issue: Routing doesn't work
 
 **Solution**: GitHub Pages doesn't support client-side routing by default. Add a `404.html` file:
@@ -139,6 +165,17 @@ base: process.env.NODE_ENV === 'production' ? '/my-portal/' : '/',
 - Set them in your repository settings under "Secrets and variables" → "Actions"
 - For Spotify: You'll need to set up the environment variables in your hosting platform
 
+### Issue: Browser cache showing old version
+
+**Solution**:
+1. **Hard refresh**: `Ctrl+Shift+R` (Windows) or `Cmd+Shift+R` (Mac)
+2. **Clear browser cache**: Go to browser settings and clear cache
+3. **Disable cache during development**: 
+   - Open developer tools (F12)
+   - Go to Network tab
+   - Check "Disable cache"
+4. **Wait for CDN propagation**: Sometimes it takes 5-10 minutes
+
 ## 📱 Testing Your Deployment
 
 After deployment, test these features:
@@ -162,6 +199,7 @@ For Spotify integration:
 - [ ] Set source to `gh-pages` branch
 - [ ] Pushed changes to main branch
 - [ ] Checked Actions tab for successful deployment
+- [ ] Cleared browser cache
 - [ ] Tested site functionality
 
 ## 🔗 Your Site URL
@@ -175,13 +213,24 @@ Replace `yourusername` with your GitHub username and `repository-name` with your
 
 ## 🆘 Still Having Issues?
 
-If you're still seeing a blank page:
+If you're still seeing errors:
 
 1. **Check browser console** for JavaScript errors
 2. **Verify repository name** in `vite.config.js` matches exactly
 3. **Check GitHub Actions logs** for build errors
 4. **Clear browser cache** and hard refresh (Ctrl+Shift+R)
 5. **Wait a few minutes** for DNS propagation
+6. **Try incognito/private browsing mode**
+
+## 🔄 Common Deployment Workflow
+
+For future updates:
+
+1. **Make changes** to your code
+2. **Test locally**: `npm run dev`
+3. **Build and deploy**: `npm run deploy`
+4. **Hard refresh** browser to see changes
+5. **Test all functionality**
 
 ## 🎉 Success!
 
