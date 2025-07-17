@@ -9,7 +9,7 @@ A modern, animated personal portal website built with React, Vite, and Framer Mo
 - **Responsive Layout**: Mobile-friendly design with hamburger menu
 - **Interactive Tools**: Enhanced calculator with expression input and currency converter
 - **Curated Links**: Personal collection of interesting websites
-- **Real Spotify Integration**: Live ticker showing currently playing and recently played music
+- **Spotify Integration**: Live ticker showing currently playing and recently played music (optional)
 - **Expression Calculator**: Type mathematical expressions directly and get instant results
 
 ## 🚀 Tech Stack
@@ -20,7 +20,7 @@ A modern, animated personal portal website built with React, Vite, and Framer Mo
 - **Styling**: Tailwind CSS
 - **Routing**: React Router DOM
 - **HTTP Client**: Axios
-- **API Integration**: Spotify Web API
+- **API Integration**: Spotify Web API (optional)
 
 ## 🎨 Design System
 
@@ -39,8 +39,9 @@ A modern, animated personal portal website built with React, Vite, and Framer Mo
 ### Home
 - Hero section with animated welcome text
 - Dynamic rotating text phrases
-- **Real Spotify ticker** with infinite scroll showing currently playing and recently played tracks
+- **Spotify ticker** with infinite scroll showing currently playing and recently played tracks
 - Mask text reveal animations
+- Falls back to demo tracks if Spotify is not configured
 
 ### Tools
 - **Enhanced Calculator**: 
@@ -69,55 +70,79 @@ A modern, animated personal portal website built with React, Vite, and Framer Mo
    npm install
    ```
 
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   ```
-   Edit `.env` and add your Spotify API credentials (see Spotify Setup section below)
-
-4. **Start development server**
+3. **Start development server**
    ```bash
    npm run dev
    ```
 
-5. **Build for production**
+   The app will work with demo data. To enable Spotify integration, follow the Spotify Setup section below.
+
+4. **Build for production**
    ```bash
    npm run build
    ```
 
-## 🎵 Spotify Setup
+## 🎵 Spotify Setup (Optional)
 
-To enable real Spotify integration:
+The app displays demo tracks by default. To show your actual Spotify listening data:
 
-1. **Create a Spotify App**
+### Prerequisites
+- A Spotify account (Free or Premium)
+- A deployed website with HTTPS (GitHub Pages, Netlify, Vercel, etc.)
+
+### Method 1: Using a Hosted Redirect URL (Recommended)
+
+1. **Deploy your website first**
+   - Deploy to GitHub Pages, Netlify, Vercel, or any HTTPS hosting service
+   - Note your deployed URL (e.g., `https://yourusername.github.io/personal-portal`)
+
+2. **Create a Spotify App**
    - Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/applications)
    - Create a new app
-   - Set redirect URI to `http://localhost:3000`
+   - Set redirect URI to your deployed URL: `https://yourusername.github.io/personal-portal`
    - Note down your Client ID and Client Secret
 
-2. **Generate Refresh Token**
-   - Visit this URL with your client ID:
+3. **Generate Refresh Token**
+   - Visit this URL (replace YOUR_CLIENT_ID and YOUR_DEPLOYED_URL):
      ```
-     https://accounts.spotify.com/en/authorize?client_id=YOUR_CLIENT_ID&response_type=code&redirect_uri=http%3A%2F%2Flocalhost:3000&scope=user-read-currently-playing+user-read-recently-played
+     https://accounts.spotify.com/en/authorize?client_id=YOUR_CLIENT_ID&response_type=code&redirect_uri=YOUR_DEPLOYED_URL&scope=user-read-currently-playing+user-read-recently-played
      ```
    - Authorize the app and copy the code from the redirect URL
-   - Create a base64 encoded string of `client_id:client_secret`
-   - Run this curl command:
+   - Create a base64 encoded string of `client_id:client_secret` using [base64encode.org](https://www.base64encode.org/)
+   - Run this curl command (replace placeholders):
      ```bash
-     curl -H "Authorization: Basic BASE64_ENCODED_CLIENT_CREDENTIALS" \
+     curl -H "Authorization: Basic YOUR_BASE64_ENCODED_CREDENTIALS" \
      -d grant_type=authorization_code \
      -d code=YOUR_CODE \
-     -d redirect_uri=http%3A%2F%2Flocalhost:3000 \
+     -d redirect_uri=YOUR_DEPLOYED_URL \
      https://accounts.spotify.com/api/token
      ```
    - Copy the `refresh_token` from the response
 
-3. **Update Environment Variables**
+4. **Set Environment Variables**
+   Create a `.env` file in your project root:
    ```env
    VITE_SPOTIFY_CLIENT_ID=your_client_id_here
    VITE_SPOTIFY_CLIENT_SECRET=your_client_secret_here
    VITE_SPOTIFY_REFRESH_TOKEN=your_refresh_token_here
    ```
+
+### Method 2: Using a Temporary Redirect Page
+
+If you don't have a hosted site yet, you can use a temporary redirect:
+
+1. Create a simple HTML page and host it on GitHub Pages or similar
+2. Use that URL as your redirect URI
+3. Follow the same steps as Method 1
+
+### Method 3: Local Development (Advanced)
+
+For local development, you can use tools like ngrok to create a temporary HTTPS tunnel:
+
+1. Install ngrok: `npm install -g ngrok`
+2. Run your app: `npm run dev`
+3. In another terminal: `ngrok http 3000`
+4. Use the provided HTTPS URL as your redirect URI
 
 ## 🌐 API Integration
 
@@ -130,29 +155,33 @@ To enable real Spotify integration:
 - **Currently Playing**: Shows the track currently playing on your Spotify account
 - **Recently Played**: Displays your recently played tracks
 - **Real-time Updates**: Refreshes every 30 seconds to show latest activity
-- **Fallback**: Uses mock data if API is unavailable or not configured
+- **Graceful Fallback**: Uses demo data if API is unavailable or not configured
 - **Visual Indicators**: Highlights currently playing track with special styling
+- **Optional**: App works perfectly without Spotify configuration
 
 ## 🎯 Key Components
 
 - **PageTransition**: Full-screen curtain wipe transitions
 - **MaskTextReveal**: Animated text reveals with mask effects
 - **DynamicText**: Rotating text component with smooth transitions
-- **SpotifyTicker**: Real-time horizontal scrolling music ticker with Spotify integration
+- **SpotifyTicker**: Music ticker with real Spotify integration and demo fallback
 - **Calculator**: Enhanced calculator with expression input and instant evaluation
 - **CurrencyConverter**: Real-time currency conversion tool
 - **LinkCard**: Animated link cards with hover effects
 
 ## 📦 Project Structure
+
+```
 src/
-├── components/ # Reusable UI components
-├── pages/ # Page components
-├── data/ # Static data files
-├── utils/ # Utility functions
-│ └── spotify.js # Spotify API integration
-├── App.jsx # Main application component
-├── main.jsx # Application entry point
-└── index.css # Global styles
+├── components/          # Reusable UI components
+├── pages/              # Page components
+├── data/               # Static data files
+├── utils/              # Utility functions
+│   └── spotify.js      # Spotify API integration
+├── App.jsx             # Main application component
+├── main.jsx            # Application entry point
+└── index.css           # Global styles
+```
 
 ## 🔧 Customization
 
@@ -183,7 +212,7 @@ Update the text array in `src/components/DynamicText.jsx` or pass custom texts t
 - Framer Motion for smooth 60fps animations
 - Lazy loading and code splitting ready
 - Responsive images and optimized assets
-- Efficient API polling for Spotify integration
+- Efficient API polling for Spotify integration (only when configured)
 
 ## 🔮 Future Enhancements
 
@@ -208,6 +237,25 @@ The enhanced calculator supports two modes:
    - Number buttons insert digits
    - Operator buttons (+, -, *, /) insert operators
    - = button evaluates the expression
+
+## 🎵 Spotify Status Messages
+
+The app will display different status messages based on configuration:
+
+- **"Spotify not configured - Showing demo tracks"**: No environment variables set
+- **"Showing demo tracks - Configure Spotify for live data"**: Credentials configured but no data available
+- **"Failed to load Spotify data - Showing demo tracks"**: API error occurred
+
+## 🔧 Troubleshooting
+
+### Spotify Issues
+- **"Spotify not configured"**: Check that all environment variables are set
+- **"Failed to load Spotify data"**: Check that your refresh token is valid
+- **CORS errors**: Ensure you're using the correct redirect URI in your Spotify app settings
+
+### General Issues
+- **Build errors**: Make sure all dependencies are installed with `npm install`
+- **Environment variables not loading**: Ensure `.env` file is in project root and variables start with `VITE_`
 
 ## 📄 License
 

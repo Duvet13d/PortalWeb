@@ -8,8 +8,17 @@ const NOW_PLAYING_ENDPOINT = 'https://api.spotify.com/v1/me/player/currently-pla
 const RECENTLY_PLAYED_ENDPOINT = 'https://api.spotify.com/v1/me/player/recently-played?limit=10'
 const TOKEN_ENDPOINT = 'https://accounts.spotify.com/api/token'
 
+// Check if Spotify credentials are available
+const hasSpotifyCredentials = () => {
+  return client_id && client_secret && refresh_token
+}
+
 // Function to get access token using refresh token
 const getAccessToken = async () => {
+  if (!hasSpotifyCredentials()) {
+    throw new Error('Spotify credentials not configured')
+  }
+
   const basic = btoa(`${client_id}:${client_secret}`)
   
   const response = await axios.post(TOKEN_ENDPOINT, 
@@ -29,6 +38,11 @@ const getAccessToken = async () => {
 
 // Function to get currently playing track
 export const getCurrentlyPlaying = async () => {
+  if (!hasSpotifyCredentials()) {
+    console.info('Spotify credentials not configured, using fallback')
+    return null
+  }
+
   try {
     const access_token = await getAccessToken()
     
@@ -63,6 +77,11 @@ export const getCurrentlyPlaying = async () => {
 
 // Function to get recently played tracks
 export const getRecentlyPlayed = async () => {
+  if (!hasSpotifyCredentials()) {
+    console.info('Spotify credentials not configured, using fallback')
+    return []
+  }
+
   try {
     const access_token = await getAccessToken()
     
@@ -89,27 +108,40 @@ export const getRecentlyPlayed = async () => {
 
 // Function to get tracks for ticker (combines current and recent)
 export const getTracksForTicker = async () => {
-  const currentTrack = await getCurrentlyPlaying()
-  const recentTracks = await getRecentlyPlayed()
-  
-  let tracks = []
-  
-  if (currentTrack) {
-    tracks.push({
-      ...currentTrack,
-      isCurrent: true
-    })
+  if (!hasSpotifyCredentials()) {
+    console.info('Spotify credentials not configured, using mock data')
+    return []
   }
-  
-  // Add recent tracks, filtering out the current track if it's in the recent list
-  const filteredRecent = recentTracks.filter(track => 
-    !currentTrack || track.id !== currentTrack.id
-  )
-  
-  tracks.push(...filteredRecent.slice(0, 7).map(track => ({
-    ...track,
-    isCurrent: false
-  })))
-  
-  return tracks
-} 
+
+  try {
+    const currentTrack = await getCurrentlyPlaying()
+    const recentTracks = await getRecentlyPlayed()
+    
+    let tracks = []
+    
+    if (currentTrack) {
+      tracks.push({
+        ...currentTrack,
+        isCurrent: true
+      })
+    }
+    
+    // Add recent tracks, filtering out the current track if it's in the recent list
+    const filteredRecent = recentTracks.filter(track => 
+      !currentTrack || track.id !== currentTrack.id
+    )
+    
+    tracks.push(...filteredRecent.slice(0, 7).map(track => ({
+      ...track,
+      isCurrent: false
+    })))
+    
+    return tracks
+  } catch (error) {
+    console.error('Error fetching tracks for ticker:', error)
+    return []
+  }
+}
+
+// Export function to check if Spotify is configured
+export const isSpotifyConfigured = hasSpotifyCredentials 

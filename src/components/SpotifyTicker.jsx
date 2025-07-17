@@ -1,12 +1,13 @@
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
-import { getTracksForTicker } from '../utils/spotify'
+import { getTracksForTicker, isSpotifyConfigured } from '../utils/spotify'
 
 const SpotifyTicker = ({ className = '' }) => {
   const [isPaused, setIsPaused] = useState(false)
   const [tracks, setTracks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [showingMockData, setShowingMockData] = useState(false)
 
   // Mock data as fallback
   const mockTracks = [
@@ -24,17 +25,31 @@ const SpotifyTicker = ({ className = '' }) => {
     const fetchTracks = async () => {
       try {
         setLoading(true)
+        
+        // Check if Spotify is configured
+        if (!isSpotifyConfigured()) {
+          setTracks(mockTracks)
+          setShowingMockData(true)
+          setError('Spotify not configured')
+          setLoading(false)
+          return
+        }
+
         const spotifyTracks = await getTracksForTicker()
         
         if (spotifyTracks.length > 0) {
           setTracks(spotifyTracks)
+          setShowingMockData(false)
+          setError(null)
         } else {
           setTracks(mockTracks)
+          setShowingMockData(true)
+          setError('No Spotify data available')
         }
-        setError(null)
       } catch (err) {
         console.error('Error fetching Spotify tracks:', err)
         setTracks(mockTracks)
+        setShowingMockData(true)
         setError('Failed to load Spotify data')
       } finally {
         setLoading(false)
@@ -43,10 +58,11 @@ const SpotifyTicker = ({ className = '' }) => {
 
     fetchTracks()
     
-    // Refresh tracks every 30 seconds
-    const interval = setInterval(fetchTracks, 30000)
-    
-    return () => clearInterval(interval)
+    // Only set up polling if Spotify is configured
+    if (isSpotifyConfigured()) {
+      const interval = setInterval(fetchTracks, 30000)
+      return () => clearInterval(interval)
+    }
   }, [])
 
   // Duplicate the tracks for seamless loop
@@ -56,17 +72,32 @@ const SpotifyTicker = ({ className = '' }) => {
     return (
       <div className={`overflow-hidden ${className}`}>
         <div className="flex items-center justify-center py-8">
-          <div className="text-white/60">Loading Spotify data...</div>
+          <div className="text-white/60">Loading music data...</div>
         </div>
       </div>
     )
   }
 
+  const getStatusMessage = () => {
+    if (!isSpotifyConfigured()) {
+      return 'Spotify not configured - Showing demo tracks'
+    }
+    if (showingMockData) {
+      return 'Showing demo tracks - Configure Spotify for live data'
+    }
+    if (error && !showingMockData) {
+      return `${error} - Showing demo tracks`
+    }
+    return null
+  }
+
+  const statusMessage = getStatusMessage()
+
   return (
     <div className={`overflow-hidden ${className}`}>
-      {error && (
-        <div className="text-center text-yellow-400 text-sm mb-4">
-          {error} - Showing sample tracks
+      {statusMessage && (
+        <div className="text-center text-yellow-400/80 text-sm mb-4">
+          {statusMessage}
         </div>
       )}
       
@@ -127,7 +158,7 @@ const SpotifyTicker = ({ className = '' }) => {
               </p>
             </div>
             
-            {track.url && (
+            {track.url && !showingMockData && (
               <a 
                 href={track.url}
                 target="_blank"
