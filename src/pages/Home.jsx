@@ -26,7 +26,8 @@ const Home = () => {
               "雷雷雷",
               "ECLIPSE",
               "RING",
-              "DREAM"
+              "DREAM",
+              "Ngau Tau Kok"
             ]}
             interval={5000}
           />
