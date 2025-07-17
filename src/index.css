@@ -2,19 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+/* CSS Custom Properties for Theme System */
+:root {
+  --color-primary: #000000;
+  --color-secondary: #111111;
+  --color-accent-1: #dd0000;
+  --color-accent-2: #fc5c12;
+  --color-text: #ffffff;
+  --color-text-secondary: #a1a1aa;
+  --color-border: #374151;
+}
+
 /* Custom global styles */
 @layer base {
   * {
     box-sizing: border-box;
   }
   
+  html {
+    scroll-behavior: smooth;
+  }
+  
   body {
     margin: 0;
     padding: 0;
-    background-color: #000000;
-    color: #ffffff;
+    background-color: var(--color-primary);
+    color: var(--color-text);
     font-family: 'IBM Plex Sans JP', sans-serif;
     overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
   
   @font-face {
@@ -46,4 +62,36 @@ input::-webkit-inner-spin-button {
 /* Delete arrow from input type number Firefox */
 input[type=number] {
   -moz-appearance: textfield;
+}
+
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) rgba(0, 0, 0, 0.1);
+}
+
+/* Smooth scroll animations */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }

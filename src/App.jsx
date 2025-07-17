@@ -10,9 +10,13 @@ import Home from './pages/Home'
 import Tools from './pages/Tools'
 import Links from './pages/Links'
 import PageTransition from './components/PageTransition'
+import { WidgetProvider } from './contexts/WidgetContext'
+import { ThemeProvider } from './contexts/ThemeContext'
+import useScrollToTop from './hooks/useScrollToTop'
 
 function AnimatedRoutes() {
   const location = useLocation()
+  useScrollToTop()
 
   return (
     <AnimatePresence mode="wait">
@@ -27,12 +31,16 @@ function AnimatedRoutes() {
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-black text-white">
-        <Header />
-        <AnimatedRoutes />
-      </div>
-    </Router>
+    <ThemeProvider>
+      <WidgetProvider>
+        <Router>
+          <div className="min-h-screen bg-black text-white">
+            <Header />
+            <AnimatedRoutes />
+          </div>
+        </Router>
+      </WidgetProvider>
+    </ThemeProvider>
   )
 }
 

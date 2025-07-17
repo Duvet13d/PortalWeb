@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import MaskTextReveal from '../components/MaskTextReveal'
 import Calculator from '../components/Calculator'
 import CurrencyConverter from '../components/CurrencyConverter'
+import Notes from '../components/tools/Notes'
 
 const Tools = () => {
   return (
@@ -23,11 +24,28 @@ const Tools = () => {
           A collection of useful utilities for everyday tasks. Simple, clean, and functional.
         </motion.p>
 
+        {/* Notes Tool - Full Width */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+          className="mb-12"
+        >
+          <div className="mb-6 sm:mb-8">
+            <h2 className="font-heading text-xl sm:text-2xl text-white mb-2 text-center">Notes</h2>
+            <p className="text-gray-400 text-sm text-center">
+              Quick note-taking with markdown support and auto-save functionality.
+            </p>
+          </div>
+          <Notes />
+        </motion.div>
+
+        {/* Calculator and Currency Converter */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-start">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, delay: 0.4 }}
+            transition={{ duration: 0.4, delay: 0.5 }}
           >
             <div className="mb-6 sm:mb-8">
               <h2 className="font-heading text-xl sm:text-2xl text-white mb-2 text-center">Calculator</h2>
@@ -41,7 +59,7 @@ const Tools = () => {
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, delay: 0.4 }}
+            transition={{ duration: 0.4, delay: 0.5 }}
           >
             <div className="mb-6 sm:mb-8">
               <h2 className="font-heading text-xl sm:text-2xl text-white mb-2 text-center">Currency Converter</h2>

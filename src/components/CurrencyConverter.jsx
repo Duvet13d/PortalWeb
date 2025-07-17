@@ -98,7 +98,7 @@ const CurrencyConverter = () => {
               className="w-full p-3 bg-black bg-opacity-50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent-1"
               placeholder="Enter amount"
               min="0"
-              maxlength="11"
+              maxLength="11"
             />
           </div>
           <div className="flex flex-col justify-end">

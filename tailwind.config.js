@@ -7,8 +7,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        'accent-1': 'rgb(221, 0, 0)',
-        'accent-2': 'rgb(252, 92, 18)',
+        'accent-1': 'var(--color-accent-1)',
+        'accent-2': 'var(--color-accent-2)',
+        'primary': 'var(--color-primary)',
+        'secondary': 'var(--color-secondary)',
+        'text-primary': 'var(--color-text)',
+        'text-secondary': 'var(--color-text-secondary)',
+        'border-primary': 'var(--color-border)',
       },
       fontFamily: {
         'heading': ['Dela Gothic One','MantouSans-Regular', 'cursive'],

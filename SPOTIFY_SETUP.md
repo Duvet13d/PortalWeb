@@ -1,158 +1,88 @@
-# Spotify Setup Guide
+# Spotify Widget Setup
 
-This guide will help you set up Spotify integration for your Personal Portal. **Note: This is completely optional** - the app works perfectly without Spotify and will show demo tracks instead.
+The Spotify widget displays your currently playing music and recently played tracks. Follow these steps to set up your Spotify integration:
 
-## Why This Changed
+## Getting Spotify API Credentials
 
-Spotify no longer allows `localhost` redirect URIs for security reasons. You now need a deployed website with HTTPS to use Spotify integration.
+1. Go to [Spotify for Developers](https://developer.spotify.com/) and log in with your Spotify account
+2. Click "Create an App" and fill in the required information:
+   - App name: "Personal Homepage" (or any name you prefer)
+   - App description: "Personal browser homepage with music integration"
+   - Website: Your homepage URL (optional)
+   - Redirect URI: `http://localhost:3000` (for development)
+3. After creating the app, you'll get a **Client ID** and **Client Secret**
+4. You'll also need to generate a **Refresh Token** (see below)
 
-## Prerequisites
+## Getting a Refresh Token
 
-- A Spotify account (Free or Premium)
-- A deployed website with HTTPS (GitHub Pages, Netlify, Vercel, etc.)
+To get a refresh token, you'll need to go through Spotify's OAuth flow:
 
-## Step-by-Step Setup
-
-### 1. Deploy Your Website First
-
-Deploy your website to any HTTPS hosting service:
-- **GitHub Pages**: `https://yourusername.github.io/personal-portal`
-- **Netlify**: `https://your-app-name.netlify.app`
-- **Vercel**: `https://your-app-name.vercel.app`
-
-### 2. Create Spotify App
-
-1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/applications)
-2. Click "Create an App"
-3. Fill in the app details:
-   - **App Name**: Personal Portal
-   - **App Description**: Personal music tracker
-   - **Redirect URI**: Your deployed URL (e.g., `https://yourusername.github.io/personal-portal`)
-4. Save and note your **Client ID** and **Client Secret**
-
-### 3. Generate Refresh Token
-
-1. **Create Authorization URL**
-   
-   Replace `YOUR_CLIENT_ID` and `YOUR_DEPLOYED_URL` in this URL:
+1. Replace `YOUR_CLIENT_ID` in this URL with your actual Client ID:
    ```
-   https://accounts.spotify.com/en/authorize?client_id=YOUR_CLIENT_ID&response_type=code&redirect_uri=YOUR_DEPLOYED_URL&scope=user-read-currently-playing+user-read-recently-played
+   https://accounts.spotify.com/authorize?client_id=YOUR_CLIENT_ID&response_type=code&redirect_uri=http://localhost:3000&scope=user-read-currently-playing%20user-read-recently-played
    ```
 
-2. **Get Authorization Code**
-   - Visit the URL above in your browser
-   - Log in and authorize the app
-   - You'll be redirected to your deployed site with a code in the URL
-   - Copy the code from the URL parameter
+2. Visit the URL in your browser and authorize the application
+3. You'll be redirected to `http://localhost:3000/?code=AUTHORIZATION_CODE`
+4. Copy the authorization code from the URL
+5. Use a tool like Postman or curl to exchange the code for a refresh token:
 
-3. **Create Base64 Credentials**
-   - Go to [base64encode.org](https://www.base64encode.org/)
-   - Encode this string: `YOUR_CLIENT_ID:YOUR_CLIENT_SECRET`
-   - Copy the base64 result
-
-4. **Get Refresh Token**
-   
-   Run this curl command (replace all placeholders):
    ```bash
-   curl -H "Authorization: Basic YOUR_BASE64_ENCODED_CREDENTIALS" \
-   -d grant_type=authorization_code \
-   -d code=YOUR_AUTHORIZATION_CODE \
-   -d redirect_uri=YOUR_DEPLOYED_URL \
-   https://accounts.spotify.com/api/token
+   curl -H "Authorization: Basic BASE64_ENCODED_CLIENT_ID_AND_SECRET" \
+        -d grant_type=authorization_code \
+        -d code=AUTHORIZATION_CODE \
+        -d redirect_uri=http://localhost:3000 \
+        https://accounts.spotify.com/api/token
    ```
 
-5. **Save the Refresh Token**
-   - Copy the `refresh_token` from the JSON response
-   - This token doesn't expire and is what you'll use in your app
+   Where `BASE64_ENCODED_CLIENT_ID_AND_SECRET` is the base64 encoding of `client_id:client_secret`
 
-### 4. Set Environment Variables
+6. The response will include a `refresh_token` - save this value
 
-Create a `.env` file in your project root:
+## Setting Up Your Environment Variables
 
-```env
-# Spotify API Configuration (OPTIONAL)
-# The app works perfectly without these - it will show demo tracks instead
+1. Create a `.env` file in the root directory of the project (if it doesn't exist)
+2. Add your Spotify credentials to the `.env` file:
 
+```
 VITE_SPOTIFY_CLIENT_ID=your_client_id_here
 VITE_SPOTIFY_CLIENT_SECRET=your_client_secret_here
 VITE_SPOTIFY_REFRESH_TOKEN=your_refresh_token_here
 ```
 
-### 5. Test Your Setup
+3. Replace the placeholder values with your actual Spotify credentials
+4. Restart the development server for the changes to take effect
 
-1. Restart your development server: `npm run dev`
-2. The Spotify ticker should now show your actual listening data
-3. If you see "Spotify not configured" message, check your environment variables
+## Using the Spotify Widget
 
-## Alternative Methods
+The Spotify widget has the following features:
 
-### Method 1: Using ngrok (Local Development)
+- **Currently Playing**: Shows the track you're currently listening to with album art, progress bar, and track info
+- **Playback Controls**: Play/pause and skip controls (visual only - actual playback control requires additional API permissions)
+- **Recently Played**: Expandable list of your recently played tracks
+- **Settings**: Toggle album artwork and playback controls visibility
+- **Auto-refresh**: Updates every 30 seconds to show current status
 
-For local development, you can use ngrok to create a temporary HTTPS tunnel:
+## Demo Mode
 
-1. Install ngrok: `npm install -g ngrok`
-2. Run your app: `npm run dev`
-3. In another terminal: `ngrok http 3000`
-4. Use the provided HTTPS URL as your redirect URI
-5. Follow the same steps as above
-
-### Method 2: Temporary Redirect Page
-
-If you don't have a hosted site yet:
-
-1. Create a simple HTML page and host it on GitHub Pages
-2. Use that URL as your redirect URI
-3. Follow the same authorization flow
+If no Spotify credentials are provided, the widget will run in demo mode with simulated music data. This is useful for development and testing purposes.
 
 ## Troubleshooting
 
-### Common Issues
+- **"Spotify not configured" message**: Make sure all three environment variables are set correctly
+- **"No Spotify data available"**: Check that you're currently playing music or have recently played tracks
+- **API errors**: Ensure your refresh token is still valid (they can expire)
+- **Development server issues**: Make sure to restart the dev server after adding environment variables
 
-**"Spotify not configured"**
-- Check that all environment variables are set in your `.env` file
-- Ensure variable names start with `VITE_`
-- Restart your development server after adding variables
+## Privacy Notes
 
-**"Failed to load Spotify data"**
-- Check that your refresh token is valid
-- Ensure your Spotify app has the correct scopes
-- Verify your client ID and secret are correct
+- Your Spotify credentials are stored locally in your `.env` file
+- The widget only accesses your currently playing and recently played tracks
+- No personal data is transmitted to external servers (except Spotify's API)
+- You can revoke access anytime from your Spotify account settings
 
-**"CORS errors"**
-- Ensure your redirect URI in Spotify app settings matches exactly
-- Make sure you're using HTTPS for your redirect URI
+## Required Spotify Scopes
 
-**"Invalid redirect URI"**
-- Spotify no longer supports localhost redirect URIs
-- Use a deployed HTTPS URL instead
-
-### Testing Your Setup
-
-You can test your environment variables by checking the browser console:
-- If you see "Spotify credentials not configured", check your `.env` file
-- If you see API errors, verify your refresh token is valid
-
-## Status Messages
-
-The app will show different messages based on your setup:
-
-- **"Spotify not configured - Showing demo tracks"**: No environment variables set
-- **"Showing demo tracks - Configure Spotify for live data"**: Credentials set but no data available
-- **"Failed to load Spotify data - Showing demo tracks"**: API error occurred
-
-## Security Notes
-
-- Never commit your `.env` file to version control
-- The refresh token doesn't expire but can be revoked
-- Client credentials should be kept secure
-- Consider using environment variables in your hosting platform for production
-
-## Support
-
-If you encounter issues:
-1. Check the browser console for error messages
-2. Verify all environment variables are set correctly
-3. Ensure your Spotify app has the correct redirect URI
-4. Try regenerating your refresh token
-
-Remember: **Spotify integration is completely optional**. The app works great without it and will show demo tracks instead! 
+The widget requires these Spotify API scopes:
+- `user-read-currently-playing`: To show what you're currently listening to
+- `user-read-recently-played`: To show your recently played tracks
