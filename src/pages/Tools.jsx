@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useEffect, useRef } from 'react'
 import MaskTextReveal from '../components/MaskTextReveal'
 import Calculator from '../components/Calculator'
 import CurrencyConverter from '../components/CurrencyConverter'

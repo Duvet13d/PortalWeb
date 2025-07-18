@@ -276,6 +276,17 @@ export const ThemeProvider = ({ children }) => {
     root.style.setProperty("--color-text-secondary", colors.textSecondary);
     root.style.setProperty("--color-border", colors.border);
 
+    // Apply theme-aware scrollbar colors
+    const scrollbarThumb = `${colors.accent1}40`; // 25% opacity
+    const scrollbarThumbHover = `${colors.accent1}66`; // 40% opacity
+    const scrollbarThumbActive = `${colors.accent1}80`; // 50% opacity
+    const scrollbarTrack = `${colors.primary}1A`; // 10% opacity
+
+    root.style.setProperty("--scrollbar-thumb", scrollbarThumb);
+    root.style.setProperty("--scrollbar-thumb-hover", scrollbarThumbHover);
+    root.style.setProperty("--scrollbar-thumb-active", scrollbarThumbActive);
+    root.style.setProperty("--scrollbar-track", scrollbarTrack);
+
     // Apply background
     const body = document.body;
     if (state.background.type === "solid") {
