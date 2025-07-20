@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { renderWithProviders, mockLocalStorage, createMockSettings } from '@test/utils'
+import { renderWithProviders, mockLocalStorage, createMockSettings } from '@test/utils.jsx'
 import App from '../../App'
 
 describe('Widget System Integration', () => {

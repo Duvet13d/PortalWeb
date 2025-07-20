@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { measureRenderTime, renderWithProviders } from '@test/utils'
+import { measureRenderTime, renderWithProviders } from '@test/utils.jsx'
 import App from '../../App'
 
 describe('Performance Tests', () => {

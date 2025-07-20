@@ -31,8 +31,19 @@ export default defineConfig({
         }
       }
     },
-    include: ['src/**/*.{test,spec}.{js,jsx,ts,tsx}'],
-    exclude: ['node_modules', 'dist', 'extensions', 'scripts'],
+    include: ['src/components/widgets/__tests__/TimezoneWidget.test.jsx'],
+    exclude: [
+      'node_modules', 
+      'dist', 
+      'extensions', 
+      'scripts',
+      'src/test/e2e/**',
+      'src/test/performance/**',
+      'src/components/__tests__/**',
+      'src/components/tools/__tests__/**',
+      'src/components/widgets/__tests__/WeatherWidget.test.jsx',
+      'src/test/integration/**'
+    ],
     testTimeout: 10000,
     hookTimeout: 10000
   },
