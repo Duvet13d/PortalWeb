@@ -39,10 +39,10 @@ export default defineConfig({
       'scripts',
       'src/test/e2e/**',
       'src/test/performance/**',
+      'src/test/integration/**',
       'src/components/__tests__/**',
       'src/components/tools/__tests__/**',
-      'src/components/widgets/__tests__/WeatherWidget.test.jsx',
-      'src/test/integration/**'
+      'src/components/widgets/__tests__/WeatherWidget.test.jsx'
     ],
     testTimeout: 10000,
     hookTimeout: 10000
