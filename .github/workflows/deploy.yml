@@ -29,9 +29,6 @@ jobs:
       - name: Run unit tests
         run: npm run test:run
 
-      - name: Run integration tests
-        run: npm run test:run src/test/integration
-
       - name: Generate coverage report
         run: npm run test:coverage
 
