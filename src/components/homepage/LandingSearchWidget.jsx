@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 /**
@@ -92,7 +92,7 @@ const LandingSearchWidget = ({ className = "" }) => {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [searchShortcuts])
 
   // Generate mock suggestions
   const generateMockSuggestions = (query) => {
@@ -104,7 +104,7 @@ const LandingSearchWidget = ({ className = "" }) => {
       `${query} how to`
     ]
     
-    return commonSuggestions.slice(0, 4).map((suggestion, index) => ({
+    return commonSuggestions.slice(0, 4).map((suggestion) => ({
       text: suggestion,
       query: suggestion,
       isShortcut: false

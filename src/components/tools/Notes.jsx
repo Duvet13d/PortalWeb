@@ -480,7 +480,7 @@ const Notes = () => {
                       </h4>
                       <p className="text-gray-400 text-sm line-clamp-2 mb-2">
                         {note.content
-                          .replace(/[#*`\[\]]/g, "")
+                          .replace(/[#*`[\]]/g, "")
                           .substring(0, 80)}
                         {note.content.length > 80 ? "..." : ""}
                       </p>
