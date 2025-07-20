@@ -7,22 +7,32 @@ import { WidgetProvider } from '../contexts/WidgetContext'
 export function renderWithProviders(ui, options = {}) {
   const {
     initialEntries = ['/'],
+    withRouter = true,
     ...renderOptions
   } = options
 
   function Wrapper({ children }) {
-    return (
-      <HashRouter>
-        <ThemeProvider>
-          <WidgetProvider>
-            {children}
-          </WidgetProvider>
-        </ThemeProvider>
-      </HashRouter>
+    const content = (
+      <ThemeProvider>
+        <WidgetProvider>
+          {children}
+        </WidgetProvider>
+      </ThemeProvider>
     )
+
+    if (withRouter) {
+      return <HashRouter>{content}</HashRouter>
+    }
+    
+    return content
   }
 
   return render(ui, { wrapper: Wrapper, ...renderOptions })
+}
+
+// Render function for components that already have a router (like App)
+export function renderWithProvidersNoRouter(ui, options = {}) {
+  return renderWithProviders(ui, { ...options, withRouter: false })
 }
 
 // Mock widget data
