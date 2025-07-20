@@ -1,21 +1,20 @@
 import { createContext, useContext, useReducer, useEffect } from "react";
+import { enhancedStorage } from "../utils/enhancedStorage";
 
 // Widget Types
 export const WIDGET_TYPES = {
-  SEARCH: "search",
-  CLOCK: "clock",
   WEATHER: "weather",
   SPOTIFY: "spotify",
   QUICK_LINKS: "quickLinks",
+  TIMEZONE: "timezone",
 };
 
-// Default widget visibility - search, clock, and weather enabled by default
+// Default widget visibility - weather enabled by default
 const DEFAULT_WIDGET_VISIBILITY = {
-  [WIDGET_TYPES.SEARCH]: true,
-  [WIDGET_TYPES.CLOCK]: true,
   [WIDGET_TYPES.WEATHER]: true,
   [WIDGET_TYPES.SPOTIFY]: false,
   [WIDGET_TYPES.QUICK_LINKS]: false,
+  [WIDGET_TYPES.TIMEZONE]: false,
 };
 
 // Widget sizes
@@ -27,26 +26,14 @@ export const WIDGET_SIZES = {
 
 // Default widget layout
 const DEFAULT_WIDGET_LAYOUT = {
-  [WIDGET_TYPES.SEARCH]: { size: WIDGET_SIZES.LARGE, order: 0 },
-  [WIDGET_TYPES.CLOCK]: { size: WIDGET_SIZES.MEDIUM, order: 1 },
-  [WIDGET_TYPES.WEATHER]: { size: WIDGET_SIZES.LARGE, order: 2 },
-  [WIDGET_TYPES.SPOTIFY]: { size: WIDGET_SIZES.MEDIUM, order: 3 },
-  [WIDGET_TYPES.QUICK_LINKS]: { size: WIDGET_SIZES.LARGE, order: 4 },
+  [WIDGET_TYPES.WEATHER]: { size: WIDGET_SIZES.LARGE, order: 0 },
+  [WIDGET_TYPES.SPOTIFY]: { size: WIDGET_SIZES.MEDIUM, order: 1 },
+  [WIDGET_TYPES.QUICK_LINKS]: { size: WIDGET_SIZES.LARGE, order: 2 },
+  [WIDGET_TYPES.TIMEZONE]: { size: WIDGET_SIZES.LARGE, order: 3 },
 };
 
 // Default widget settings
 const DEFAULT_WIDGET_SETTINGS = {
-  [WIDGET_TYPES.SEARCH]: {
-    defaultEngine: "google",
-    showSuggestions: true,
-  },
-  [WIDGET_TYPES.CLOCK]: {
-    format: "12h",
-    showSeconds: false,
-    timezone: "local",
-    showDate: true,
-    dateFormat: "full",
-  },
   [WIDGET_TYPES.WEATHER]: {
     location: "auto",
     units: "metric",
@@ -60,6 +47,16 @@ const DEFAULT_WIDGET_SETTINGS = {
     columns: 3,
     showLabels: true,
     links: [],
+  },
+  [WIDGET_TYPES.TIMEZONE]: {
+    selectedTimezones: [
+      'America/New_York',
+      'Europe/London', 
+      'Asia/Tokyo',
+      'Asia/Hong_Kong'
+    ],
+    format24Hour: false,
+    showSeconds: false,
   },
 };
 
@@ -153,45 +150,52 @@ const WidgetContext = createContext();
 export const WidgetProvider = ({ children }) => {
   const [state, dispatch] = useReducer(widgetReducer, initialState);
 
-  // Load widget preferences from localStorage on mount
+  // Load widget preferences from enhanced storage on mount
   useEffect(() => {
-    try {
-      const savedWidgets = localStorage.getItem("homepage-widgets");
-      if (savedWidgets) {
-        const parsedWidgets = JSON.parse(savedWidgets);
-        dispatch({
-          type: WIDGET_ACTIONS.LOAD_WIDGETS,
-          payload: parsedWidgets,
-        });
-      } else {
+    const loadWidgets = async () => {
+      try {
+        const savedWidgets = await enhancedStorage.get("widgets", { fallbackToBackup: true });
+        if (savedWidgets) {
+          dispatch({
+            type: WIDGET_ACTIONS.LOAD_WIDGETS,
+            payload: savedWidgets,
+          });
+        } else {
+          dispatch({
+            type: WIDGET_ACTIONS.LOAD_WIDGETS,
+            payload: {},
+          });
+        }
+      } catch (error) {
+        console.warn("Failed to load widget preferences:", error);
         dispatch({
           type: WIDGET_ACTIONS.LOAD_WIDGETS,
           payload: {},
         });
       }
-    } catch (error) {
-      console.warn("Failed to load widget preferences:", error);
-      dispatch({
-        type: WIDGET_ACTIONS.LOAD_WIDGETS,
-        payload: {},
-      });
-    }
+    };
+
+    loadWidgets();
   }, []);
 
-  // Save to localStorage whenever state changes
+  // Save to enhanced storage whenever state changes
   useEffect(() => {
-    if (state.isLoaded) {
-      try {
-        const widgetData = {
-          visibility: state.visibility,
-          settings: state.settings,
-          layout: state.layout,
-        };
-        localStorage.setItem("homepage-widgets", JSON.stringify(widgetData));
-      } catch (error) {
-        console.warn("Failed to save widget preferences:", error);
+    const saveWidgets = async () => {
+      if (state.isLoaded) {
+        try {
+          const widgetData = {
+            visibility: state.visibility,
+            settings: state.settings,
+            layout: state.layout,
+          };
+          await enhancedStorage.set("widgets", widgetData, { backup: true });
+        } catch (error) {
+          console.warn("Failed to save widget preferences:", error);
+        }
       }
-    }
+    };
+
+    saveWidgets();
   }, [state.visibility, state.settings, state.layout, state.isLoaded]);
 
   // Actions

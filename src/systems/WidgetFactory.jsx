@@ -1,14 +1,16 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import widgetRegistry from './WidgetRegistry'
 import { useWidgets } from '../contexts/WidgetContext'
 import PlaceholderWidget from '../components/widgets/PlaceholderWidget'
+import { WidgetLoadingFallback, useProgressiveLoading, measurePerformance } from '../utils/lazyLoading.jsx'
+import { WidgetErrorBoundary } from '../components/ErrorBoundary'
 
 /**
  * Widget Factory - Creates widget instances with proper configuration and error handling
  */
 export class WidgetFactory {
   /**
-   * Create a widget component instance
+   * Create a widget component instance with progressive loading
    * @param {string} widgetId - Widget ID from registry
    * @param {Object} props - Additional props to pass to widget
    * @returns {React.Component} Widget component instance
@@ -23,9 +25,10 @@ export class WidgetFactory {
 
     const { component: WidgetComponent, metadata, defaultSize } = widgetDefinition
 
-    // Create wrapper component that provides widget context
+    // Create wrapper component that provides widget context with progressive loading
     const WidgetWrapper = (wrapperProps) => {
       const { getWidgetSettings, updateWidgetSettings } = useWidgets()
+      const { loadWidget } = useProgressiveLoading()
       const settings = getWidgetSettings(widgetDefinition.type)
 
       const widgetProps = {
@@ -40,15 +43,41 @@ export class WidgetFactory {
         }
       }
 
+      // All widgets use progressive loading now
+      const fallbackHeight = WidgetFactory.getSizeHeight(widgetProps.size)
+
+      // Progressive loading for secondary widgets
+      const ProgressiveWidget = loadWidget(WidgetComponent, { 
+        height: fallbackHeight,
+        width: '100%' 
+      })
+
       return (
-        <ErrorBoundary widgetId={widgetId}>
-          <WidgetComponent {...widgetProps} />
-        </ErrorBoundary>
+        <WidgetErrorBoundary 
+          widgetId={widgetId} 
+          widgetName={widgetDefinition.metadata?.name || widgetId}
+        >
+          <ProgressiveWidget {...widgetProps} />
+        </WidgetErrorBoundary>
       )
     }
 
     WidgetWrapper.displayName = `Widget(${widgetId})`
     return WidgetWrapper
+  }
+
+  /**
+   * Get height based on widget size
+   * @param {string} size - Widget size (small, medium, large)
+   * @returns {string} Height value
+   */
+  static getSizeHeight(size) {
+    const sizeMap = {
+      small: '120px',
+      medium: '200px',
+      large: '300px'
+    }
+    return sizeMap[size] || sizeMap.medium
   }
 
   /**
@@ -127,43 +156,7 @@ export class WidgetFactory {
   }
 }
 
-/**
- * Error Boundary for individual widgets
- */
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = { hasError: false, error: null }
-  }
 
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error }
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error(`Widget "${this.props.widgetId}" crashed:`, error, errorInfo)
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <PlaceholderWidget
-          title="Widget Error"
-          description={`Widget "${this.props.widgetId}" encountered an error`}
-          size="medium"
-          className="border-red-500/50 bg-red-900/20"
-          icon={
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full text-red-400">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          }
-        />
-      )
-    }
-
-    return this.props.children
-  }
-}
 
 /**
  * Hook to create widgets within React components

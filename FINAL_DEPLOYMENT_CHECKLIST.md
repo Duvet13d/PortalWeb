@@ -1,85 +1,227 @@
 # Final Deployment Checklist
 
-This guide provides the definitive steps to fix the deployment issue. The core problem is that GitHub Pages is likely serving your site from the wrong branch (`main`) instead of the correct one (`gh-pages`).
+This checklist ensures your Personal Portal is properly configured and ready for deployment across all platforms.
 
-Please follow these steps exactly.
+## 📋 Pre-Deployment Setup
+
+### 1. Repository Configuration
+- [ ] Update repository name in `vite.config.js` base path
+- [ ] Update GitHub repository URL in `updateChecker.js`
+- [ ] Update repository URLs in `BROWSER_SETUP.md`
+- [ ] Update repository URLs in `DEPLOY_GUIDE.md`
+- [ ] Verify `package.json` version matches extension manifests
+
+### 2. Environment Variables
+- [ ] Create `.env.example` with all required variables
+- [ ] Document all environment variables in README
+- [ ] Set up production environment variables in hosting platform
+- [ ] Test with and without optional API keys
+
+### 3. API Configuration
+- [ ] Spotify API credentials (optional)
+- [ ] Weather API key (optional)
+- [ ] Currency conversion API (optional)
+- [ ] Test all API integrations
+
+## 🌐 Web Deployment
+
+### GitHub Pages
+- [ ] Enable GitHub Pages in repository settings
+- [ ] Configure custom domain (if applicable)
+- [ ] Test GitHub Actions deployment workflow
+- [ ] Verify HTTPS is enabled
+- [ ] Test all routes work with hash routing
+
+### Alternative Hosting
+- [ ] Configure build settings for chosen platform
+- [ ] Set up environment variables
+- [ ] Configure custom domain and SSL
+- [ ] Test deployment pipeline
+
+## 🔧 Browser Extension Deployment
+
+### Chrome Extension
+- [ ] Build extension: `npm run build:chrome-extension`
+- [ ] Test extension locally in developer mode
+- [ ] Create Chrome Web Store developer account
+- [ ] Prepare store listing assets (screenshots, descriptions)
+- [ ] Upload and submit for review
+
+### Firefox Extension
+- [ ] Build extension: `npm run build:firefox-extension`
+- [ ] Test extension locally in Firefox
+- [ ] Create Firefox Add-on developer account
+- [ ] Prepare listing information
+- [ ] Upload and submit for review
+
+## 🧪 Testing Checklist
+
+### Functionality Testing
+- [ ] All widgets load and function correctly
+- [ ] Settings persist across browser sessions
+- [ ] Keyboard shortcuts work
+- [ ] Search functionality works
+- [ ] Tools (calculator, currency converter) work
+- [ ] Links page loads and navigation works
+- [ ] Offline mode functions properly
+
+### Cross-Browser Testing
+- [ ] Chrome (latest)
+- [ ] Firefox (latest)
+- [ ] Safari (latest)
+- [ ] Edge (latest)
+- [ ] Mobile browsers (Chrome Mobile, Safari Mobile)
+
+### Performance Testing
+- [ ] Page loads in under 2 seconds
+- [ ] Lighthouse score > 90
+- [ ] Bundle size is optimized
+- [ ] Service worker caches properly
+- [ ] Update notifications work
+
+### Accessibility Testing
+- [ ] Keyboard navigation works throughout
+- [ ] Screen reader compatibility
+- [ ] Color contrast meets WCAG AA standards
+- [ ] Focus indicators are visible
+- [ ] ARIA labels are properly set
+
+## 📱 Mobile Optimization
+
+### Responsive Design
+- [ ] Layout works on mobile devices
+- [ ] Touch interactions work properly
+- [ ] Text is readable on small screens
+- [ ] Widgets adapt to mobile layout
+
+### PWA Features
+- [ ] Add to home screen works
+- [ ] Offline functionality
+- [ ] Service worker updates properly
+
+## 🔒 Security & Privacy
+
+### Security Measures
+- [ ] Content Security Policy is configured
+- [ ] No sensitive data in client-side code
+- [ ] HTTPS is enforced
+- [ ] Input validation is implemented
+
+### Privacy Compliance
+- [ ] Local storage only (no external data collection)
+- [ ] Clear privacy policy if collecting any data
+- [ ] User consent for external APIs
+- [ ] Data export/import functionality
+
+## 📊 Analytics & Monitoring
+
+### Optional Analytics
+- [ ] Google Analytics setup (if desired)
+- [ ] Error tracking (Sentry, etc.)
+- [ ] Performance monitoring
+- [ ] User feedback collection
+
+## 📚 Documentation
+
+### User Documentation
+- [ ] README is comprehensive and up-to-date
+- [ ] Browser setup instructions are clear
+- [ ] API setup guides are complete
+- [ ] Troubleshooting section is helpful
+
+### Developer Documentation
+- [ ] Code is well-commented
+- [ ] Architecture is documented
+- [ ] Deployment process is documented
+- [ ] Contributing guidelines exist
+
+## 🚀 Launch Preparation
+
+### Final Checks
+- [ ] All placeholder URLs are updated
+- [ ] Version numbers are consistent
+- [ ] All features work as expected
+- [ ] Performance is optimized
+- [ ] Error handling is robust
+
+### Marketing Materials
+- [ ] Screenshots for app stores
+- [ ] Feature descriptions
+- [ ] Demo videos (optional)
+- [ ] Social media assets
+
+### Support Setup
+- [ ] GitHub Issues template
+- [ ] Support documentation
+- [ ] FAQ section
+- [ ] Contact information
+
+## 🔄 Post-Launch
+
+### Monitoring
+- [ ] Monitor error rates
+- [ ] Track performance metrics
+- [ ] Monitor user feedback
+- [ ] Check update mechanism
+
+### Maintenance
+- [ ] Regular dependency updates
+- [ ] Security patch monitoring
+- [ ] Feature request tracking
+- [ ] Bug fix prioritization
+
+## 📝 Deployment Commands
+
+### Web Deployment
+```bash
+# Build and deploy to GitHub Pages
+npm run build
+npm run deploy
+
+# Or use GitHub Actions (automatic on push to main)
+git push origin main
+```
+
+### Extension Deployment
+```bash
+# Build Chrome extension
+npm run build:chrome-extension
+
+# Build Firefox extension
+npm run build:firefox-extension
+
+# Clean extension builds
+npm run clean:extensions
+```
+
+### Testing Commands
+```bash
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Run linting
+npm run lint
+```
+
+## ✅ Sign-off
+
+- [ ] **Developer**: All functionality implemented and tested
+- [ ] **QA**: All test cases pass
+- [ ] **Security**: Security review completed
+- [ ] **Performance**: Performance benchmarks met
+- [ ] **Accessibility**: Accessibility standards met
+- [ ] **Documentation**: All documentation complete
+- [ ] **Deployment**: Ready for production deployment
 
 ---
 
-### Step 1: Verify Your GitHub Pages Settings
-
-1.  **Go to your Repository Settings.**
-    Navigate to your `PortalWeb` repository on GitHub and click the "Settings" tab.
-
-    ![Step 1](https://i.imgur.com/kYqR4q3.png)
-
-2.  **Go to the "Pages" section.**
-    In the left sidebar, click on "Pages".
-
-    ![Step 2](https://i.imgur.com/G5g20g3.png)
-
-3.  **Set the Correct Deployment Source.**
-    - Under "Build and deployment", for the "Source", select **"Deploy from a branch"**.
-    - In the branch dropdown menu that appears, select **`gh-pages`**.
-    - Ensure the folder is set to `/ (root)`.
-    - Click **"Save"**.
-
-    It is **critical** that the branch is set to `gh-pages`. Your settings should look exactly like this:
-
-    ![Step 3](https://i.imgur.com/8c3f4V8.png)
-
----
-
-### Step 2: Force a Clean Redeployment
-
-Pushing a small change will trigger the GitHub Action to run again, ensuring the latest build is deployed to the correct branch.
-
-1.  **Make a small, trivial change.**
-    You can add a space or a comment to the `README.md` file.
-
-2.  **Commit and push the change.**
-    ```bash
-    git add .
-    git commit -m "chore: Force redeployment"
-    git push origin main
-    ```
-
----
-
-### Step 3: Monitor the Deployment
-
-1.  **Go to the "Actions" tab** in your repository.
-2.  You should see a new workflow running for your "chore: Force redeployment" commit.
-3.  Wait for the workflow to complete successfully. It should have a green checkmark.
-
----
-
-### Step 4: Clear Your Browser Cache (Critically Important)
-
-This is the most important step. Your browser is likely holding on to a broken version of the site.
-
-1.  **Open your deployed site** in your browser.
-    [https://duvet13d.github.io/PortalWeb/](https://duvet13d.github.io/PortalWeb/)
-
-2.  **Open the Developer Tools.**
-    -   Press `F12` (or `Ctrl+Shift+I` on Windows, `Cmd+Opt+I` on Mac).
-
-3.  **Perform a Hard Refresh and Empty Cache.**
-    -   Go to the "Network" tab in the developer tools.
-    -   Check the "Disable cache" box.
-    -   Right-click the browser's refresh button and select **"Empty Cache and Hard Reload"**.
-
-    ![Step 4](https://i.imgur.com/S5rN6hF.png)
-
-4.  **Alternatively, use an incognito/private window**, as this will ignore any cached files.
-
----
-
-### Why This is the Solution
-
--   **The `main` branch contains source code.** Its `index.html` points to `/src/main.jsx`, which is not a real JavaScript file and causes the MIME type errors.
--   **The `gh-pages` branch contains production code.** Its `index.html` points to the correctly bundled `/assets/index-....js` file.
-
-By ensuring GitHub Pages deploys from `gh-pages`, you guarantee that the correct, production-ready version of your site is being served.
-
-If you have followed these steps exactly, the issue will be resolved. 
+**Deployment Date**: ___________  
+**Deployed By**: ___________  
+**Version**: 1.0.0  
+**Notes**: ___________

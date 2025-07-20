@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { enhancedStorage } from "../../utils/enhancedStorage";
+import { ariaUtils, keyboardUtils, focusUtils } from "../../utils/accessibility";
 
 /**
  * Notes Tool - Full-featured note-taking with markdown support for the Tools page
@@ -20,36 +22,44 @@ const Notes = () => {
   const textareaRef = useRef(null);
   const autoSaveRef = useRef(null);
 
-  // Load notes from localStorage on mount
+  // Load notes from enhanced storage on mount
   useEffect(() => {
-    try {
-      const savedNotes = localStorage.getItem("homepage-notes");
-      const savedSettings = localStorage.getItem("notes-settings");
+    const loadData = async () => {
+      try {
+        const savedNotes = await enhancedStorage.get("personal_notes", { 
+          fallbackToBackup: true,
+          // Notes are considered sensitive and may be encrypted
+          password: undefined // Will be handled by the storage system
+        });
+        const savedSettings = await enhancedStorage.get("notes_settings", { 
+          fallbackToBackup: true 
+        });
 
-      if (savedNotes) {
-        const parsedNotes = JSON.parse(savedNotes);
-        setNotes(parsedNotes);
-        if (parsedNotes.length > 0) {
-          setSelectedNoteId(parsedNotes[0].id);
-          setCurrentNote(parsedNotes[0].content);
+        if (savedNotes) {
+          setNotes(savedNotes);
+          if (savedNotes.length > 0) {
+            setSelectedNoteId(savedNotes[0].id);
+            setCurrentNote(savedNotes[0].content);
+          }
         }
-      }
 
-      if (savedSettings) {
-        const settings = JSON.parse(savedSettings);
-        setAutoSave(settings.autoSave !== false);
-        setShowToolbar(settings.showToolbar !== false);
+        if (savedSettings) {
+          setAutoSave(savedSettings.autoSave !== false);
+          setShowToolbar(savedSettings.showToolbar !== false);
+        }
+      } catch (error) {
+        console.error("Failed to load notes:", error);
       }
-    } catch (error) {
-      console.error("Failed to load notes:", error);
-    }
+    };
+
+    loadData();
   }, []);
 
-  // Save settings to localStorage
-  const saveSettings = useCallback(() => {
+  // Save settings to enhanced storage
+  const saveSettings = useCallback(async () => {
     try {
       const settings = { autoSave, showToolbar };
-      localStorage.setItem("notes-settings", JSON.stringify(settings));
+      await enhancedStorage.set("notes_settings", settings, { backup: true });
     } catch (error) {
       console.error("Failed to save settings:", error);
     }
@@ -67,7 +77,10 @@ const Notes = () => {
 
       setIsSaving(true);
       try {
-        localStorage.setItem("homepage-notes", JSON.stringify(notesToSave));
+        await enhancedStorage.set("personal_notes", notesToSave, { 
+          backup: true,
+          // Notes are sensitive and will be encrypted if encryption is enabled
+        });
         setLastSaved(new Date());
       } catch (error) {
         console.error("Failed to save notes:", error);
@@ -295,6 +308,8 @@ const Notes = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className="bg-gray-900/50 border border-gray-700 rounded-xl p-6 backdrop-blur-sm w-full max-w-7xl mx-auto"
+      role="application"
+      aria-label="Notes application"
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
@@ -331,14 +346,17 @@ const Notes = () => {
           )}
           <button
             onClick={() => setShowSearch(!showSearch)}
-            className="p-2 text-gray-400 hover:text-white transition-colors"
-            title="Search notes"
+            className="p-2 text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-accent-1 rounded"
+            aria-label={showSearch ? "Hide search" : "Show search"}
+            aria-expanded={showSearch}
+            aria-controls="notes-search"
           >
             <svg
               className="w-5 h-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -350,8 +368,10 @@ const Notes = () => {
           </button>
           <button
             onClick={() => setShowSettings(!showSettings)}
-            className="p-2 text-gray-400 hover:text-white transition-colors"
-            title="Settings"
+            className="p-2 text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-accent-1 rounded"
+            aria-label={showSettings ? "Hide settings" : "Show settings"}
+            aria-expanded={showSettings}
+            aria-controls="notes-settings"
           >
             <svg
               className="w-5 h-5"
@@ -380,17 +400,23 @@ const Notes = () => {
       <AnimatePresence>
         {showSearch && (
           <motion.div
+            id="notes-search"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             className="mb-6"
           >
+            <label htmlFor="search-input" className="sr-only">
+              Search notes
+            </label>
             <input
+              id="search-input"
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search notes..."
               className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-accent-1 focus:ring-2 focus:ring-accent-1/20 transition-all duration-300"
+              data-search-input
             />
           </motion.div>
         )}
@@ -404,37 +430,48 @@ const Notes = () => {
             <h3 className="text-lg font-medium text-white">All Notes</h3>
             <button
               onClick={createNewNote}
-              className="px-3 py-1 bg-accent-1 hover:bg-accent-2 text-white text-sm rounded transition-colors"
+              className="px-3 py-1 bg-accent-1 hover:bg-accent-2 text-white text-sm rounded transition-colors focus:outline-none focus:ring-2 focus:ring-accent-1 focus:ring-offset-2 focus:ring-offset-gray-900"
+              aria-label="Create new note"
             >
               New Note
             </button>
           </div>
 
-          <div className="space-y-3 overflow-y-auto h-full">
+          <div 
+            className="space-y-3 overflow-y-auto h-full"
+            role="listbox"
+            aria-label="Notes list"
+          >
             {filteredNotes.length === 0 ? (
-              <div className="text-center py-12">
+              <div className="text-center py-12" role="status">
                 <p className="text-gray-400 mb-4">
                   {searchQuery ? "No notes found" : "No notes yet"}
                 </p>
                 {!searchQuery && (
                   <button
                     onClick={createNewNote}
-                    className="text-accent-1 hover:text-accent-2 transition-colors"
+                    className="text-accent-1 hover:text-accent-2 transition-colors focus:outline-none focus:ring-2 focus:ring-accent-1 rounded"
+                    aria-label="Create your first note"
                   >
                     Create your first note
                   </button>
                 )}
               </div>
             ) : (
-              filteredNotes.map((note) => (
+              filteredNotes.map((note, index) => (
                 <div
                   key={note.id}
                   onClick={() => selectNote(note.id)}
-                  className={`p-4 rounded-lg cursor-pointer transition-colors group ${
+                  onKeyDown={(e) => keyboardUtils.handleActivation(e, () => selectNote(note.id))}
+                  className={`p-4 rounded-lg cursor-pointer transition-colors group focus:outline-none focus:ring-2 focus:ring-accent-1 ${
                     selectedNoteId === note.id
                       ? "bg-accent-1/20 border border-accent-1/30"
                       : "bg-gray-800/30 hover:bg-gray-800/50"
                   }`}
+                  role="option"
+                  aria-selected={selectedNoteId === note.id}
+                  tabIndex={0}
+                  aria-label={`Note: ${note.title}, updated ${formatDate(note.updatedAt)}`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
@@ -455,15 +492,17 @@ const Notes = () => {
                       onClick={(e) => {
                         e.stopPropagation();
                         deleteNote(note.id);
+                        ariaUtils.announce(`Note "${note.title}" deleted`);
                       }}
-                      className="opacity-0 group-hover:opacity-100 p-1 text-red-400 hover:text-red-300 transition-all ml-2"
-                      title="Delete note"
+                      className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 text-red-400 hover:text-red-300 transition-all ml-2 focus:outline-none focus:ring-2 focus:ring-red-500 rounded"
+                      aria-label={`Delete note: ${note.title}`}
                     >
                       <svg
                         className="w-4 h-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
+                        aria-hidden="true"
                       >
                         <path
                           strokeLinecap="round"

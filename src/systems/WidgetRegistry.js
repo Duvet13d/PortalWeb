@@ -1,8 +1,8 @@
 import { WIDGET_TYPES } from '../contexts/WidgetContext'
-import ClockWidget from '../components/widgets/ClockWidget'
-import SearchWidget from '../components/widgets/SearchWidget'
 import WeatherWidget from '../components/widgets/WeatherWidget'
 import SpotifyWidget from '../components/widgets/SpotifyWidget'
+import TimezoneWidget from '../components/widgets/TimezoneWidget'
+import PlaceholderWidget from '../components/widgets/PlaceholderWidget'
 
 /**
  * Widget Registry - Central system for managing widget definitions and components
@@ -140,43 +140,8 @@ class WidgetRegistry {
    * These will be replaced by actual widget implementations
    */
   registerPlaceholderWidgets() {
-    // Import placeholder component dynamically to avoid circular dependencies
-    const PlaceholderWidget = ({ title, description, icon, size }) => {
-      return {
-        id: `placeholder-${title.toLowerCase()}`,
-        title,
-        description,
-        icon,
-        size
-      }
-    }
-
     // Register default widget types with placeholders
     const defaultWidgets = [
-      {
-        id: 'search-widget',
-        type: WIDGET_TYPES.SEARCH,
-        component: SearchWidget,
-        defaultSize: 'large',
-        configurable: true,
-        metadata: {
-          name: 'Search',
-          description: 'Universal search with smart suggestions',
-          icon: 'search'
-        }
-      },
-      {
-        id: 'clock-widget',
-        type: WIDGET_TYPES.CLOCK,
-        component: ClockWidget,
-        defaultSize: 'medium',
-        configurable: true,
-        metadata: {
-          name: 'Clock',
-          description: 'Current time and date display',
-          icon: 'clock'
-        }
-      },
       {
         id: 'weather-widget',
         type: WIDGET_TYPES.WEATHER,
@@ -211,6 +176,18 @@ class WidgetRegistry {
           name: 'Quick Links',
           description: 'Your favorite bookmarks',
           icon: 'link'
+        }
+      },
+      {
+        id: 'timezone-widget',
+        type: WIDGET_TYPES.TIMEZONE,
+        component: TimezoneWidget,
+        defaultSize: 'large',
+        configurable: true,
+        metadata: {
+          name: 'World Clock',
+          description: 'Current time in different timezones',
+          icon: 'globe'
         }
       },
 

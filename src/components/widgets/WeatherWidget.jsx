@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useOfflineAwareAPI, useOfflineStatus, offlineStorage } from '../../utils/offline'
+import { retryAPICall, RETRY_CONFIGS } from '../../utils/retry'
+import { handleWeatherAPI, globalAPIHandler, apiErrorNotifier } from '../../utils/apiFailureHandler'
 
 /**
  * Weather Widget - Current weather and forecast with location detection
@@ -18,6 +21,7 @@ const WeatherWidget = ({
   const [error, setError] = useState(null)
   const [location, setLocation] = useState(null)
   const [showSettings, setShowSettings] = useState(false)
+  const [isOfflineData, setIsOfflineData] = useState(false)
 
   // Default settings
   const locationSetting = settings.location || 'auto'
@@ -26,6 +30,14 @@ const WeatherWidget = ({
 
   // OpenWeatherMap API key (in production, this should be in environment variables)
   const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY || 'demo'
+
+  // Offline-aware API hook
+  const { fetchData, isOnline } = useOfflineAwareAPI({
+    retryAttempts: 3,
+    retryDelay: 2000,
+    cacheTimeout: 600000 // 10 minutes for weather data
+  })
+  const { isOnline: connectionStatus } = useOfflineStatus()
 
   // Get user's location
   const getUserLocation = useCallback(() => {
@@ -54,7 +66,7 @@ const WeatherWidget = ({
     })
   }, [])
 
-  // Fetch weather data
+  // Fetch weather data with enhanced offline support and retry logic
   const fetchWeatherData = useCallback(async (lat, lon) => {
     if (API_KEY === 'demo') {
       // Return demo data when no API key is available
@@ -62,13 +74,31 @@ const WeatherWidget = ({
     }
 
     try {
+      // Use enhanced API failure handler for weather calls
       const [currentResponse, forecastResponse] = await Promise.all([
-        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=${units}`),
-        showForecast ? fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=${units}`) : Promise.resolve(null)
+        handleWeatherAPI(
+          () => fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=${units}`),
+          `${lat}_${lon}_current`
+        ),
+        showForecast ? handleWeatherAPI(
+          () => fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=${units}`),
+          `${lat}_${lon}_forecast`
+        ) : Promise.resolve(null)
       ])
 
-      if (!currentResponse.ok) {
-        throw new Error('Failed to fetch weather data')
+      // Check if responses are from cache or fallback
+      const isCurrentCached = currentResponse.headers.get('X-Cached-Response') === 'true'
+      const isCurrentFallback = currentResponse.headers.get('X-Fallback-Response') === 'true'
+      const isForecastCached = forecastResponse?.headers.get('X-Cached-Response') === 'true'
+      const isForecastFallback = forecastResponse?.headers.get('X-Fallback-Response') === 'true'
+      
+      setIsOfflineData(isCurrentCached || isCurrentFallback || isForecastCached || isForecastFallback)
+
+      // Notify about API failures if using fallback data
+      if (isCurrentFallback || isForecastFallback) {
+        const failureType = currentResponse.headers.get('X-Failure-Type')
+        const message = globalAPIHandler.getErrorMessage(failureType, 'Weather')
+        apiErrorNotifier.notify('Weather API', failureType, message)
       }
 
       const currentData = await currentResponse.json()
@@ -80,7 +110,12 @@ const WeatherWidget = ({
       }
     } catch (error) {
       console.error('Weather API error:', error)
-      throw error
+      
+      // Notify about the error
+      apiErrorNotifier.notify('Weather API', 'network_error', 'Weather service is unavailable. Using demo data.')
+      
+      // Fallback to demo data as last resort
+      return getDemoWeatherData()
     }
   }, [API_KEY, units, showForecast])
 
@@ -286,11 +321,23 @@ const WeatherWidget = ({
         </div>
       </div>
 
-      {error && API_KEY !== 'demo' && (
+      {/* Offline/Error Status */}
+      {(error && API_KEY !== 'demo') && (
         <div className="mb-4 p-3 bg-yellow-900/30 border border-yellow-600 rounded-lg">
-          <p className="text-yellow-400 text-sm">
+          <p className="text-white text-sm">
             Weather data unavailable. Showing demo data.
           </p>
+        </div>
+      )}
+      
+      {isOfflineData && (
+        <div className="mb-4 p-3 bg-blue-900/30 border border-blue-600 rounded-lg">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+            <p className="text-white text-sm">
+              {!connectionStatus ? 'Offline - Showing cached data' : 'Using cached weather data'}
+            </p>
+          </div>
         </div>
       )}
 

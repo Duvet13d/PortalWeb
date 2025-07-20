@@ -37,7 +37,7 @@ const LinkCard = ({ title, url, description, category, index = 0 }) => {
       
       {category && (
         <div className="flex items-center gap-2">
-          <span className="px-2 py-1 bg-accent-2 bg-opacity-20 text-accent-2 text-xs font-medium rounded-full">
+          <span className="px-3 py-1 bg-accent-2 text-white text-xs font-medium rounded-md">
             {category}
           </span>
           <span className="text-gray-500 text-xs">

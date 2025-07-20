@@ -113,16 +113,7 @@ const WidgetManager = ({
  */
 const getWidgetIcon = (iconType) => {
   const icons = {
-    search: (
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-      </svg>
-    ),
-    clock: (
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
+
     cloud: (
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
@@ -138,6 +129,11 @@ const getWidgetIcon = (iconType) => {
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
       </svg>
     ),
+    globe: (
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
     edit: (
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -145,7 +141,7 @@ const getWidgetIcon = (iconType) => {
     )
   }
 
-  return icons[iconType] || icons.search
+  return icons[iconType] || icons.cloud
 }
 
 /**

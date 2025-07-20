@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from "react";
+import { enhancedStorage } from "../utils/enhancedStorage";
 
 // Theme presets
 export const THEME_PRESETS = {
@@ -214,45 +215,52 @@ const ThemeContext = createContext();
 export const ThemeProvider = ({ children }) => {
   const [state, dispatch] = useReducer(themeReducer, initialState);
 
-  // Load theme from localStorage on mount
+  // Load theme from enhanced storage on mount
   useEffect(() => {
-    try {
-      const savedTheme = localStorage.getItem("homepage-theme");
-      if (savedTheme) {
-        const parsedTheme = JSON.parse(savedTheme);
-        dispatch({
-          type: THEME_ACTIONS.LOAD_THEME,
-          payload: parsedTheme,
-        });
-      } else {
+    const loadTheme = async () => {
+      try {
+        const savedTheme = await enhancedStorage.get("theme", { fallbackToBackup: true });
+        if (savedTheme) {
+          dispatch({
+            type: THEME_ACTIONS.LOAD_THEME,
+            payload: savedTheme,
+          });
+        } else {
+          dispatch({
+            type: THEME_ACTIONS.LOAD_THEME,
+            payload: {},
+          });
+        }
+      } catch (error) {
+        console.warn("Failed to load theme preferences:", error);
         dispatch({
           type: THEME_ACTIONS.LOAD_THEME,
           payload: {},
         });
       }
-    } catch (error) {
-      console.warn("Failed to load theme preferences:", error);
-      dispatch({
-        type: THEME_ACTIONS.LOAD_THEME,
-        payload: {},
-      });
-    }
+    };
+
+    loadTheme();
   }, []);
 
-  // Save theme to localStorage whenever it changes
+  // Save theme to enhanced storage whenever it changes
   useEffect(() => {
-    if (state.isLoaded) {
-      try {
-        const themeData = {
-          currentPreset: state.currentPreset,
-          customColors: state.customColors,
-          background: state.background,
-        };
-        localStorage.setItem("homepage-theme", JSON.stringify(themeData));
-      } catch (error) {
-        console.warn("Failed to save theme preferences:", error);
+    const saveTheme = async () => {
+      if (state.isLoaded) {
+        try {
+          const themeData = {
+            currentPreset: state.currentPreset,
+            customColors: state.customColors,
+            background: state.background,
+          };
+          await enhancedStorage.set("theme", themeData, { backup: true });
+        } catch (error) {
+          console.warn("Failed to save theme preferences:", error);
+        }
       }
-    }
+    };
+
+    saveTheme();
   }, [
     state.currentPreset,
     state.customColors,

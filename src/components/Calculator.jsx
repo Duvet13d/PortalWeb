@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { ariaUtils, keyboardUtils } from '../utils/accessibility'
 
 const Calculator = () => {
   const [expression, setExpression] = useState('')
@@ -8,11 +9,11 @@ const Calculator = () => {
   const inputRef = useRef(null)
 
   // Focus the input when component mounts
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [])
+  // useEffect(() => {
+  //   if (inputRef.current) {
+  //     inputRef.current.focus()
+  //   }
+  // }, [])
 
   // Safe evaluation function
   const evaluateExpression = (expr) => {
@@ -62,6 +63,9 @@ const Calculator = () => {
     const evalResult = evaluateExpression(expression)
     setResult(evalResult)
     setIsShowingResult(true)
+    
+    // Announce result to screen readers
+    ariaUtils.announce(`Result: ${evalResult}`)
     
     // If result is valid, replace expression with result
     if (evalResult !== 'Error') {
@@ -136,12 +140,14 @@ const Calculator = () => {
     }
   }
 
-  const Button = ({ onClick, className = '', children, ...props }) => (
+  const Button = ({ onClick, className = '', children, ariaLabel, ...props }) => (
     <motion.button
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
-      className={`h-16 rounded-lg font-semibold text-lg transition-colors duration-200 ${className}`}
+      onKeyDown={(e) => keyboardUtils.handleActivation(e, onClick)}
+      className={`h-16 rounded-lg font-semibold text-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent-1 focus:ring-offset-2 focus:ring-offset-gray-900 ${className}`}
+      aria-label={ariaLabel || children}
       {...props}
     >
       {children}
@@ -149,9 +155,17 @@ const Calculator = () => {
   )
 
   return (
-    <div className="w-full max-w-sm mx-auto bg-white bg-opacity-5 rounded-xl p-6 backdrop-blur-sm">
+    <div 
+      className="w-full max-w-sm mx-auto bg-white bg-opacity-5 rounded-xl p-6 backdrop-blur-sm"
+      role="application"
+      aria-label="Calculator"
+    >
       <div className="mb-4">
+        <label htmlFor="calculator-input" className="sr-only">
+          Calculator expression input
+        </label>
         <input
+          id="calculator-input"
           ref={inputRef}
           type="text"
           value={expression}
@@ -159,8 +173,15 @@ const Calculator = () => {
           onKeyPress={handleKeyPress}
           placeholder="Enter Here or Below"
           className="w-full p-4 bg-black bg-opacity-50 rounded-lg text-white text-right text-xl font-mono focus:outline-none focus:ring-2 focus:ring-accent-1 placeholder-gray-400"
+          aria-describedby="calculator-result"
+          autoComplete="off"
         />
-        <div className="mt-2 p-2 text-right text-lg font-mono text-gray-300">
+        <div 
+          id="calculator-result"
+          className="mt-2 p-2 text-right text-lg font-mono text-gray-300"
+          aria-live="polite"
+          aria-label={`Result: ${result}`}
+        >
           = {result}
         </div>
       </div>
@@ -169,18 +190,21 @@ const Calculator = () => {
         <Button
           onClick={clear}
           className="col-span-2 bg-accent-1 hover:bg-red-600 text-white"
+          ariaLabel="Clear calculator"
         >
           Clear
         </Button>
         <Button
           onClick={() => insertOperator('/')}
           className="bg-accent-2 hover:bg-orange-600 text-white"
+          ariaLabel="Divide"
         >
           ÷
         </Button>
         <Button
           onClick={() => insertOperator('*')}
           className="bg-accent-2 hover:bg-orange-600 text-white"
+          ariaLabel="Multiply"
         >
           ×
         </Button>
@@ -206,6 +230,7 @@ const Calculator = () => {
         <Button
           onClick={() => insertOperator('-')}
           className="bg-accent-2 hover:bg-orange-600 text-white"
+          ariaLabel="Subtract"
         >
           −
         </Button>
@@ -213,24 +238,28 @@ const Calculator = () => {
         <Button
           onClick={() => insertNumber('4')}
           className="bg-white bg-opacity-10 hover:bg-opacity-20 text-white"
+          ariaLabel="4"
         >
           4
         </Button>
         <Button
           onClick={() => insertNumber('5')}
           className="bg-white bg-opacity-10 hover:bg-opacity-20 text-white"
+          ariaLabel="5"
         >
           5
         </Button>
         <Button
           onClick={() => insertNumber('6')}
           className="bg-white bg-opacity-10 hover:bg-opacity-20 text-white"
+          ariaLabel="6"
         >
           6
         </Button>
         <Button
           onClick={() => insertOperator('+')}
           className="bg-accent-2 hover:bg-orange-600 text-white"
+          ariaLabel="Add"
         >
           +
         </Button>
@@ -238,24 +267,28 @@ const Calculator = () => {
         <Button
           onClick={() => insertNumber('1')}
           className="bg-white bg-opacity-10 hover:bg-opacity-20 text-white"
+          ariaLabel="1"
         >
           1
         </Button>
         <Button
           onClick={() => insertNumber('2')}
           className="bg-white bg-opacity-10 hover:bg-opacity-20 text-white"
+          ariaLabel="2"
         >
           2
         </Button>
         <Button
           onClick={() => insertNumber('3')}
           className="bg-white bg-opacity-10 hover:bg-opacity-20 text-white"
+          ariaLabel="3"
         >
           3
         </Button>
         <Button
           onClick={calculate}
           className="row-span-2 bg-accent-1 hover:bg-red-600 text-white"
+          ariaLabel="Calculate result"
         >
           =
         </Button>
@@ -263,12 +296,14 @@ const Calculator = () => {
         <Button
           onClick={() => insertNumber('0')}
           className="col-span-2 bg-white bg-opacity-10 hover:bg-opacity-20 text-white"
+          ariaLabel="0"
         >
           0
         </Button>
         <Button
           onClick={insertDecimal}
           className="bg-white bg-opacity-10 hover:bg-opacity-20 text-white"
+          ariaLabel="Decimal point"
         >
           .
         </Button>

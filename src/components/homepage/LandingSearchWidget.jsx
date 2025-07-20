@@ -259,6 +259,8 @@ const LandingSearchWidget = ({ className = "" }) => {
           onFocus={() => query.trim() && setShowSuggestions(true)}
           placeholder="Search the web or enter a URL..."
           className="w-full px-6 py-4 pr-20 text-lg bg-gray-900/50 border border-gray-700 rounded-full text-white placeholder-gray-400 focus:outline-none focus:border-accent-1 focus:ring-2 focus:ring-accent-1/20 transition-all duration-300 backdrop-blur-sm"
+          data-search-input
+          aria-label="Search the web or enter a URL"
         />
         
         {/* Engine Selector and Search Icon */}
@@ -269,9 +271,12 @@ const LandingSearchWidget = ({ className = "" }) => {
               onClick={() => setShowEngineSelector(!showEngineSelector)}
               className={`flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-gray-800/50 transition-colors ${engine.color}`}
               title={`Search with ${engine.name}`}
+              aria-label={`Select search engine, currently ${engine.name}`}
+              aria-expanded={showEngineSelector}
+              aria-haspopup="listbox"
             >
-              <span className="text-sm">{engine.icon}</span>
-              <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span className="text-sm" aria-hidden="true">{engine.icon}</span>
+              <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
@@ -283,6 +288,8 @@ const LandingSearchWidget = ({ className = "" }) => {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   className="absolute top-full right-0 mt-2 bg-gray-900/95 border border-gray-600 rounded-lg shadow-xl z-50 min-w-[120px] backdrop-blur-sm"
+                  role="listbox"
+                  aria-label="Search engine options"
                 >
                   {Object.entries(searchEngines).map(([key, searchEngine]) => (
                     <button
@@ -291,11 +298,14 @@ const LandingSearchWidget = ({ className = "" }) => {
                       className={`w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-700/50 transition-colors first:rounded-t-lg last:rounded-b-lg ${
                         key === currentEngine ? 'bg-gray-700/50' : ''
                       }`}
+                      role="option"
+                      aria-selected={key === currentEngine}
+                      aria-label={`Select ${searchEngine.name} as search engine`}
                     >
-                      <span className="text-sm">{searchEngine.icon}</span>
+                      <span className="text-sm" aria-hidden="true">{searchEngine.icon}</span>
                       <span className={`text-sm font-medium ${searchEngine.color}`}>{searchEngine.name}</span>
                       {key === currentEngine && (
-                        <svg className="w-3 h-3 text-accent-1 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3 h-3 text-accent-1 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       )}
@@ -327,6 +337,8 @@ const LandingSearchWidget = ({ className = "" }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             className="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 border border-gray-600 rounded-xl shadow-xl z-40 max-h-60 overflow-y-auto backdrop-blur-sm"
+            role="listbox"
+            aria-label="Search suggestions"
           >
             {suggestions.map((suggestion, index) => (
               <button
@@ -335,6 +347,9 @@ const LandingSearchWidget = ({ className = "" }) => {
                 className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-700/50 transition-colors first:rounded-t-xl last:rounded-b-xl ${
                   selectedSuggestion === index ? 'bg-gray-700/50' : ''
                 }`}
+                role="option"
+                aria-selected={selectedSuggestion === index}
+                aria-label={`Search for ${suggestion.text}`}
               >
                 {suggestion.isShortcut ? (
                   <>
