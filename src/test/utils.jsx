@@ -1,7 +1,6 @@
 import { render } from '@testing-library/react'
 import { HashRouter } from 'react-router-dom'
 import { ThemeProvider } from '../contexts/ThemeContext'
-import { WidgetProvider } from '../contexts/WidgetContext'
 
 // Custom render function with providers
 export function renderWithProviders(ui, options = {}) {
@@ -14,9 +13,7 @@ export function renderWithProviders(ui, options = {}) {
   function Wrapper({ children }) {
     const content = (
       <ThemeProvider>
-        <WidgetProvider>
-          {children}
-        </WidgetProvider>
+        {children}
       </ThemeProvider>
     )
 

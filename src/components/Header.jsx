@@ -8,7 +8,6 @@ import SettingsPanel from './SettingsPanel'
 const navLinks = [
   { name: 'Home', path: './' },
   { name: 'Tools', path: './tools' },
-  { name: 'Links', path: './links' },
 ]
 
 const Header = () => {
@@ -46,7 +45,7 @@ const Header = () => {
                 to={link.path}
                 className={({ isActive }) =>
                   `font-heading text-base lg:text-lg transition-colors duration-300 ${
-                    isActive ? 'text-accent-1' : 'text-white hover:text-accent-2'
+                    isActive ? 'text-accent-1' : 'text-text-primary hover:text-accent-2'
                   }`
                 }
               >
@@ -58,7 +57,7 @@ const Header = () => {
           {/* Theme Customizer Button */}
           <button
             onClick={toggleThemeCustomizer}
-            className="p-2 text-gray-400 hover:text-white transition-colors"
+            className="p-2 text-text-secondary hover:text-text-primary transition-colors"
             title="Customize Theme"
             aria-label="Open theme customization panel"
           >
@@ -70,7 +69,7 @@ const Header = () => {
           {/* Settings Panel Button */}
           <button
             onClick={toggleSettingsPanel}
-            className="p-2 text-gray-400 hover:text-white transition-colors"
+            className="p-2 text-text-secondary hover:text-text-primary transition-colors"
             title="Settings"
             aria-label="Open settings panel"
           >
@@ -90,9 +89,9 @@ const Header = () => {
           aria-controls="mobile-menu"
           data-menu-toggle
         >
-          <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
-          <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMenuOpen ? 'opacity-0' : ''}`}></span>
-          <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
+          <span className={`block w-6 h-0.5 bg-text-primary transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
+          <span className={`block w-6 h-0.5 bg-text-primary transition-all duration-300 ${isMenuOpen ? 'opacity-0' : ''}`}></span>
+          <span className={`block w-6 h-0.5 bg-text-primary transition-all duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
         </button>
       </header>
 
@@ -120,7 +119,7 @@ const Header = () => {
                       onClick={closeMenu}
                       className={({ isActive }) =>
                         `font-heading text-3xl transition-colors duration-300 ${
-                          isActive ? 'text-accent-1' : 'text-white hover:text-accent-2'
+                          isActive ? 'text-accent-1' : 'text-text-primary hover:text-accent-2'
                         }`
                       }
                     >
@@ -136,7 +135,7 @@ const Header = () => {
                       toggleThemeCustomizer()
                       closeMenu()
                     }}
-                    className="font-heading text-3xl text-white hover:text-accent-2 transition-colors duration-300 flex items-center gap-3"
+                    className="font-heading text-3xl text-text-primary hover:text-accent-2 transition-colors duration-300 flex items-center gap-3"
                     aria-label="Open theme customization panel"
                   >
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,7 +152,7 @@ const Header = () => {
                       toggleSettingsPanel()
                       closeMenu()
                     }}
-                    className="font-heading text-3xl text-white hover:text-accent-2 transition-colors duration-300 flex items-center gap-3"
+                    className="font-heading text-3xl text-text-primary hover:text-accent-2 transition-colors duration-300 flex items-center gap-3"
                     aria-label="Open settings panel"
                   >
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">

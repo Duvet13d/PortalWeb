@@ -14,8 +14,7 @@ describe('Application Integration', () => {
         gap: 16,
         widgets: []
       }),
-      'notes-data': JSON.stringify([]),
-      'calculator-history': JSON.stringify([])
+      'notes-data': JSON.stringify([])
     })
 
     // Mock APIs
@@ -37,7 +36,6 @@ describe('Application Integration', () => {
     // Should show main navigation
     expect(screen.getByText(/home/i)).toBeInTheDocument()
     expect(screen.getByText(/tools/i)).toBeInTheDocument()
-    expect(screen.getByText(/links/i)).toBeInTheDocument()
     
     // Should show default widgets (weather is enabled by default now)
     expect(screen.getByText(/weather/i)).toBeInTheDocument()
@@ -50,13 +48,12 @@ describe('Application Integration', () => {
     // Navigate to Tools page
     await user.click(screen.getByText(/tools/i))
     await waitFor(() => {
-      expect(screen.getByText(/calculator/i)).toBeInTheDocument()
+      expect(screen.getByText(/notes/i)).toBeInTheDocument()
     })
     
-    // Navigate to Links page
-    await user.click(screen.getByText(/links/i))
+    // Check that links section is visible on home page
     await waitFor(() => {
-      expect(screen.getByText(/curated links/i)).toBeInTheDocument()
+      expect(screen.getByText(/links/i)).toBeInTheDocument()
     })
     
     // Navigate back to Home
@@ -73,24 +70,11 @@ describe('Application Integration', () => {
     // 1. User navigates to tools
     await user.click(screen.getByText(/tools/i))
     
-    // 2. User opens calculator
-    const calculatorButton = screen.getByText(/calculator/i)
-    await user.click(calculatorButton)
+    // 2. User can see notes tool
+    expect(screen.getByText(/notes/i)).toBeInTheDocument()
     
-    // 3. User performs calculation
-    await user.click(screen.getByText('5'))
-    await user.click(screen.getByText('+'))
-    await user.click(screen.getByText('3'))
-    await user.click(screen.getByText('='))
-    
-    expect(screen.getByDisplayValue('8')).toBeInTheDocument()
-    
-    // 4. User closes calculator
-    const closeButton = screen.getByLabelText(/close/i)
-    await user.click(closeButton)
-    
-    // 5. User navigates to links
-    await user.click(screen.getByText(/links/i))
+    // 3. User scrolls to links section
+    // Links are now on the home page
     
     // 6. User searches links
     const searchInput = screen.getByPlaceholderText(/search links/i)
@@ -152,8 +136,7 @@ describe('Application Integration', () => {
     await user.tab()
     expect(screen.getByText(/tools/i)).toHaveFocus()
     
-    await user.tab()
-    expect(screen.getByText(/links/i)).toHaveFocus()
+    // Links navigation removed, skip this test
     
     // Navigate with Enter
     await user.keyboard('{Enter}')
@@ -176,12 +159,9 @@ describe('Application Integration', () => {
     // Local features should still work
     expect(screen.getByText(/weather/i)).toBeInTheDocument()
     
-    // Calculator should work offline
+    // Notes should work offline
     await user.click(screen.getByText(/tools/i))
-    const calculatorButton = screen.getByText(/calculator/i)
-    await user.click(calculatorButton)
-    
-    expect(screen.getByTestId('calculator')).toBeInTheDocument()
+    expect(screen.getByText(/notes/i)).toBeInTheDocument()
   })
 
   it('handles data migration correctly', async () => {

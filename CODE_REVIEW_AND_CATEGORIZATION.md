@@ -102,8 +102,7 @@ src/components/widgets/SpotifyWidget.jsx   # Music integration
 
 #### 3.1 Productivity Tools
 ```
-src/components/tools/Calculator.jsx         # Advanced calculator
-src/components/tools/CurrencyConverter.jsx # Currency conversion
+
 src/components/tools/Notes.jsx             # Note-taking system
 ```
 

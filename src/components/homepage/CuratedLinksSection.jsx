@@ -1,11 +1,18 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
-import MaskTextReveal from '../components/MaskTextReveal'
-import LinkCard from '../components/LinkCard'
-import { linksData } from '../data/links'
-import { enhancedStorage } from '../utils/enhancedStorage'
+import MaskTextReveal from '../MaskTextReveal'
+import LinkCard from '../LinkCard'
+import { useScrollTrigger } from '../../hooks/useScrollTrigger'
+import { linksData } from '../../data/links'
+import { enhancedStorage } from '../../utils/enhancedStorage'
 
-const Links = () => {
+const CuratedLinksSection = () => {
+  const { ref: sectionRef, isVisible: sectionVisible } = useScrollTrigger({
+    threshold: 0.1,
+    rootMargin: '-100px',
+    once: true
+  })
+
   const [customLinks, setCustomLinks] = useState([])
   const [showAddForm, setShowAddForm] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState('All')
@@ -112,28 +119,30 @@ const Links = () => {
   }
 
   return (
-    <div className="min-h-screen py-16 sm:py-20 px-4 sm:px-6">
+    <section ref={sectionRef} className="min-h-screen py-16 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
-        <MaskTextReveal 
-          className="font-heading text-3xl sm:text-4xl md:text-6xl text-white text-center mb-4"
-          delay={0.1}
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-12"
         >
-          LINKS
-        </MaskTextReveal>
-        
-        <motion.p 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="text-gray-300 text-base sm:text-lg text-center mb-8 max-w-2xl mx-auto px-2"
-        >
-          A curated collection of interesting websites, tools, and resources. Add your own bookmarks to personalize your collection.
-        </motion.p>
+          <MaskTextReveal 
+            className="font-heading text-3xl sm:text-4xl md:text-5xl text-text-primary mb-4"
+            delay={0.2}
+          >
+            LINKS
+          </MaskTextReveal>
+          <p className="text-text-secondary text-base sm:text-lg max-w-2xl mx-auto">
+            A curated collection of interesting websites, tools, and resources. Add your own bookmarks to personalize your collection.
+          </p>
+        </motion.div>
 
         {/* Controls */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.4, delay: 0.3 }}
           className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8"
         >
@@ -145,8 +154,8 @@ const Links = () => {
                 onClick={() => setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   selectedCategory === category
-                    ? 'bg-accent-1 text-white'
-                    : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50'
+                    ? 'bg-accent-1 text-text-primary'
+                    : 'bg-secondary/50 text-text-secondary hover:bg-primary/50'
                 }`}
               >
                 {category}
@@ -157,7 +166,7 @@ const Links = () => {
           {/* Add Link Button */}
           <button
             onClick={() => setShowAddForm(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-accent-1 hover:bg-accent-2 text-white rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-accent-1 hover:bg-accent-2 text-text-primary rounded-lg transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -173,9 +182,9 @@ const Links = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mb-8 p-6 bg-gray-900/50 border border-gray-700 rounded-xl"
+              className="mb-8 p-6 bg-secondary/50 border border-border-primary rounded-xl"
             >
-              <h3 className="text-lg font-semibold text-white mb-4">
+              <h3 className="text-lg font-semibold text-text-primary mb-4">
                 {editingLink ? 'Edit Bookmark' : 'Add New Bookmark'}
               </h3>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -247,7 +256,7 @@ const Links = () => {
         {filteredCustomLinks.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.4, delay: 0.4 }}
             className="mb-12"
           >
@@ -293,7 +302,7 @@ const Links = () => {
         {filteredCuratedLinks.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.4, delay: 0.5 }}
           >
             <h2 className="text-2xl font-heading text-white mb-6">Curated Links</h2>
@@ -316,7 +325,7 @@ const Links = () => {
         {filteredCuratedLinks.length === 0 && filteredCustomLinks.length === 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.4, delay: 0.4 }}
             className="text-center py-12"
           >
@@ -330,9 +339,10 @@ const Links = () => {
           </motion.div>
         )}
 
+        {/* Footer Note */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, delay: 0.8 }}
           className="text-center mt-12 sm:mt-16"
         >
@@ -341,8 +351,8 @@ const Links = () => {
           </p>
         </motion.div>
       </div>
-    </div>
+    </section>
   )
 }
 
-export default Links 
+export default CuratedLinksSection

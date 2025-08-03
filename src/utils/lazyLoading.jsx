@@ -1,20 +1,13 @@
 import { lazy, Suspense } from 'react';
 
-// Lazy load widget components for better performance
-export const LazyWeatherWidget = lazy(() => import('../components/widgets/WeatherWidget.jsx'));
-export const LazySpotifyWidget = lazy(() => import('../components/widgets/SpotifyWidget.jsx'));
-export const LazyTimezoneWidget = lazy(() => import('../components/widgets/TimezoneWidget.jsx'));
-
 // Lazy load tool components
-export const LazyCalculator = lazy(() => import('../components/Calculator.jsx'));
-export const LazyCurrencyConverter = lazy(() => import('../components/CurrencyConverter.jsx'));
 export const LazyNotes = lazy(() => import('../components/tools/Notes.jsx'));
 
 // Lazy load theme components
 export const LazyThemeCustomizer = lazy(() => import('../components/theme/ThemeCustomizer.jsx'));
 
 // Loading fallback component
-export const WidgetLoadingFallback = ({ height = '200px', width = '100%' }) => (
+export const ComponentLoadingFallback = ({ height = '200px', width = '100%' }) => (
   <div 
     className="animate-pulse bg-gray-800/50 rounded-lg border border-gray-700/50 flex items-center justify-center"
     style={{ height, width }}
@@ -36,12 +29,12 @@ export const ToolLoadingFallback = () => (
   </div>
 );
 
-// Progressive loading hook for widgets
+// Progressive loading hook for components
 export const useProgressiveLoading = () => {
-  const loadWidget = (WidgetComponent, fallbackProps = {}) => {
+  const loadComponent = (Component, fallbackProps = {}) => {
     return (props) => (
-      <Suspense fallback={<WidgetLoadingFallback {...fallbackProps} />}>
-        <WidgetComponent {...props} />
+      <Suspense fallback={<ComponentLoadingFallback {...fallbackProps} />}>
+        <Component {...props} />
       </Suspense>
     );
   };
@@ -54,10 +47,10 @@ export const useProgressiveLoading = () => {
     );
   };
 
-  return { loadWidget, loadTool };
+  return { loadComponent, loadTool };
 };
 
-// Intersection Observer for lazy loading widgets on scroll
+// Intersection Observer for lazy loading components on scroll
 export const useIntersectionObserver = (callback, options = {}) => {
   const defaultOptions = {
     root: null,
@@ -78,27 +71,23 @@ export const useIntersectionObserver = (callback, options = {}) => {
   return observer;
 };
 
-// Preload critical widgets
-export const preloadCriticalWidgets = () => {
-  // Preload existing widgets that are enabled by default
-  import('../components/widgets/WeatherWidget.jsx');
+// Preload critical components
+export const preloadCriticalComponents = () => {
+  // Preload components that are likely to be used
+  import('../components/tools/Notes.jsx');
 };
 
-// Preload secondary widgets after initial load
-export const preloadSecondaryWidgets = () => {
+// Preload secondary components after initial load
+export const preloadSecondaryComponents = () => {
   // Use requestIdleCallback to preload during idle time
   if ('requestIdleCallback' in window) {
     requestIdleCallback(() => {
-      import('../components/widgets/WeatherWidget.jsx');
-      import('../components/widgets/SpotifyWidget.jsx');
-      import('../components/widgets/TimezoneWidget.jsx');
+      import('../components/theme/ThemeCustomizer.jsx');
     });
   } else {
     // Fallback for browsers without requestIdleCallback
     setTimeout(() => {
-      import('../components/widgets/WeatherWidget.jsx');
-      import('../components/widgets/SpotifyWidget.jsx');
-      import('../components/widgets/TimezoneWidget.jsx');
+      import('../components/theme/ThemeCustomizer.jsx');
     }, 2000);
   }
 };

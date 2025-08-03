@@ -11,6 +11,15 @@ class UpdateChecker {
   // Check if an update is available
   async checkForUpdates(force = false) {
     try {
+      // Skip if no valid GitHub repo is configured
+      if (!this.githubRepo || this.githubRepo === 'yourusername/PortalWeb') {
+        return {
+          available: false,
+          error: 'GitHub repository not configured',
+          lastChecked: Date.now()
+        };
+      }
+
       const lastCheck = localStorage.getItem(this.lastCheckKey);
       const now = Date.now();
       

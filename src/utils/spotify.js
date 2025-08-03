@@ -21,19 +21,26 @@ const getAccessToken = async () => {
 
   const basic = btoa(`${client_id}:${client_secret}`)
   
-  const response = await axios.post(TOKEN_ENDPOINT, 
-    new URLSearchParams({
-      grant_type: 'refresh_token',
-      refresh_token: refresh_token,
-    }), {
-      headers: {
-        'Authorization': `Basic ${basic}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+  try {
+    const response = await axios.post(TOKEN_ENDPOINT, 
+      new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: refresh_token,
+      }), {
+        headers: {
+          'Authorization': `Basic ${basic}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      }
+    )
+    
+    return response.data.access_token
+  } catch (error) {
+    if (error.response?.status === 400) {
+      throw new Error('Invalid Spotify credentials or refresh token expired')
     }
-  )
-  
-  return response.data.access_token
+    throw error
+  }
 }
 
 // Function to get currently playing track

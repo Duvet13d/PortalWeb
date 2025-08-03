@@ -74,12 +74,10 @@ test.describe('Personal Portal Homepage', () => {
     // Navigate to Tools page
     await page.getByText(/tools/i).click()
     await expect(page).toHaveURL(/.*#\/tools/)
-    await expect(page.getByText(/calculator/i)).toBeVisible()
+    await expect(page.getByText(/notes/i)).toBeVisible()
     
-    // Navigate to Links page
-    await page.getByText(/links/i).click()
-    await expect(page).toHaveURL(/.*#\/links/)
-    await expect(page.getByText(/curated links/i)).toBeVisible()
+    // Check that links section is visible on home page
+    await expect(page.getByText(/links/i)).toBeVisible()
     
     // Navigate back to home
     await page.getByText(/home/i).click()

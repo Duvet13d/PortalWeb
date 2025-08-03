@@ -15,6 +15,17 @@ export default {
         'text-secondary': 'var(--color-text-secondary)',
         'border-primary': 'var(--color-border)',
       },
+      backgroundColor: {
+        'primary': 'var(--color-primary)',
+        'secondary': 'var(--color-secondary)',
+      },
+      textColor: {
+        'primary': 'var(--color-text)',
+        'secondary': 'var(--color-text-secondary)',
+      },
+      borderColor: {
+        'primary': 'var(--color-border)',
+      },
       fontFamily: {
         'heading': ['Dela Gothic One','MantouSans-Regular', 'cursive'],
         'body': ['IBM Plex Sans JP', 'sans-serif'],

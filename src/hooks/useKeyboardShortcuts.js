@@ -35,10 +35,7 @@ export const useKeyboardShortcuts = () => {
           event.preventDefault()
           navigate('/tools')
           break
-        case 'l':
-          event.preventDefault()
-          navigate('/links')
-          break
+
         default:
           break
       }

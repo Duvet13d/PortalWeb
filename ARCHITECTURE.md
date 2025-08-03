@@ -137,8 +137,7 @@ src/
 - **SpotifyWidget.jsx**: Music player integration
 
 #### 3. **Tool Components** (`src/components/tools/`)
-- **Calculator.jsx**: Advanced calculator with expression parsing
-- **CurrencyConverter.jsx**: Real-time currency conversion
+
 - **Notes.jsx**: Note-taking with markdown support
 
 #### 4. **System Components** (`src/systems/`)

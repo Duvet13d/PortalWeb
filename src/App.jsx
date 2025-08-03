@@ -8,7 +8,7 @@ import { AnimatePresence } from 'framer-motion'
 import { lazy, Suspense, useEffect } from 'react'
 import Header from './components/Header'
 import PageTransition from './components/PageTransition'
-import { WidgetProvider } from './contexts/WidgetContext'
+
 import { ThemeProvider } from './contexts/ThemeContext'
 import useScrollToTop from './hooks/useScrollToTop'
 import useKeyboardShortcuts from './hooks/useKeyboardShortcuts'
@@ -22,7 +22,6 @@ import { skipLinkUtils } from './utils/accessibility'
 // Lazy load pages for better performance
 const Home = lazy(() => import('./pages/Home'))
 const Tools = lazy(() => import('./pages/Tools'))
-const Links = lazy(() => import('./pages/Links'))
 
 // Component to handle scroll-to-top behavior
 function ScrollToTop() {
@@ -69,13 +68,6 @@ function AnimatedRoutes() {
             </Suspense>
           </PageTransition>
         } />
-        <Route path="/links" element={
-          <PageTransition>
-            <Suspense fallback={<PageLoadingFallback />}>
-              <Links />
-            </Suspense>
-          </PageTransition>
-        } />
       </Routes>
     </AnimatePresence>
   )
@@ -86,7 +78,7 @@ function AppContent() {
   return (
     <>
       <ScrollToTop />
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen text-white">
         <PageErrorBoundary pageName="Header">
           <Header />
         </PageErrorBoundary>
@@ -130,11 +122,14 @@ function App() {
   return (
     <PageErrorBoundary pageName="Application">
       <ThemeProvider>
-        <WidgetProvider>
-          <Router>
-            <AppContent />
-          </Router>
-        </WidgetProvider>
+        <Router
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true
+          }}
+        >
+          <AppContent />
+        </Router>
       </ThemeProvider>
     </PageErrorBoundary>
   )

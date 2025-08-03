@@ -43,7 +43,7 @@ export default defineConfig({
           }
           
           // Tool components
-          if (id.includes('/tools/') || id.includes('Calculator') || id.includes('CurrencyConverter')) {
+          if (id.includes('/tools/')) {
             return 'tools';
           }
           

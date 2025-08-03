@@ -165,8 +165,7 @@ For local development, you can use tools like ngrok to create a temporary HTTPS 
 - **MaskTextReveal**: Animated text reveals with mask effects
 - **DynamicText**: Rotating text component with smooth transitions
 - **SpotifyTicker**: Music ticker with real Spotify integration and demo fallback
-- **Calculator**: Enhanced calculator with expression input and instant evaluation
-- **CurrencyConverter**: Real-time currency conversion tool
+
 - **LinkCard**: Animated link cards with hover effects
 
 ## 📦 Project Structure

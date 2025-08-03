@@ -1,5 +1,5 @@
 import LandingSection from '../components/homepage/LandingSection'
-import WidgetSection from '../components/homepage/WidgetSection'
+import CuratedLinksSection from '../components/homepage/CuratedLinksSection'
 
 const Home = () => {
   return (
@@ -7,8 +7,8 @@ const Home = () => {
       {/* Landing Section - Above the fold */}
       <LandingSection />
       
-      {/* Widget Section - Below the fold, scroll triggered */}
-      <WidgetSection />
+      {/* Curated Links Section - Below the fold, scroll triggered */}
+      <CuratedLinksSection />
     </div>
   )
 }
