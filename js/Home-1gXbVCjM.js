@@ -1,0 +1,1 @@
+import{j as s}from"./react-vendor-BlsGRQ4b.js";import{L as o,C as r}from"./homepage-DPfpqd_m.js";import"./vendor-bMAKmOd3.js";import"./motion-SEeoIC92.js";import"./utils-CY6uHEMy.js";const e=()=>s.jsxs("div",{className:"min-h-screen",children:[s.jsx(o,{}),s.jsx(r,{})]});export{e as default};
