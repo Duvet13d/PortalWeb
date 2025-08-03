@@ -113,33 +113,7 @@ export const THEME_PRESETS = {
   },
 };
 
-// Background patterns
-export const BACKGROUND_PATTERNS = {
-  DOTS: {
-    id: "dots",
-    name: "Dots",
-    css: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0)`,
-    size: "20px 20px",
-  },
-  GRID: {
-    id: "grid",
-    name: "Grid",
-    css: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-    size: "20px 20px",
-  },
-  DIAGONAL: {
-    id: "diagonal",
-    name: "Diagonal Lines",
-    css: `repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,0.05) 20px)`,
-    size: "auto",
-  },
-  HEXAGON: {
-    id: "hexagon",
-    name: "Hexagon",
-    css: `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 2px, transparent 2px)`,
-    size: "30px 26px",
-  },
-};
+
 
 // Action types
 const THEME_ACTIONS = {
@@ -284,6 +258,9 @@ export const ThemeProvider = ({ children }) => {
     root.style.setProperty("--color-text-secondary", colors.textSecondary);
     root.style.setProperty("--color-border", colors.border);
 
+    // Debug log to verify colors are being applied
+    console.log('Theme colors applied:', colors);
+
     // Apply theme-aware scrollbar colors
     const scrollbarThumb = `${colors.accent1}40`; // 25% opacity
     const scrollbarThumbHover = `${colors.accent1}66`; // 40% opacity
@@ -295,27 +272,57 @@ export const ThemeProvider = ({ children }) => {
     root.style.setProperty("--scrollbar-thumb-active", scrollbarThumbActive);
     root.style.setProperty("--scrollbar-track", scrollbarTrack);
 
-    // Apply background
+    // Apply background using a dedicated background layer
     const body = document.body;
-    if (state.background.type === "solid") {
+    
+    // Remove existing background layer if it exists
+    const existingBgLayer = document.getElementById('theme-background-layer');
+    if (existingBgLayer) {
+      existingBgLayer.remove();
+    }
+
+    if (state.background.type === "image" && state.background.value) {
+      // Create a dedicated background layer for image with filters
+      const bgLayer = document.createElement('div');
+      bgLayer.id = 'theme-background-layer';
+      bgLayer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        pointer-events: none;
+        background-image: url(${state.background.value});
+        background-size: ${state.background.size || 'cover'};
+        background-position: ${state.background.position || 'center'};
+        background-repeat: ${state.background.repeat || 'no-repeat'};
+        background-attachment: fixed;
+        filter: ${state.background.filter || 'none'};
+      `;
+      
+      // Clear body background and set fallback color
+      body.style.backgroundImage = 'none';
+      body.style.backgroundColor = colors.primary;
+      body.style.filter = 'none';
+      
+      // Insert background layer as first child
+      document.body.insertBefore(bgLayer, document.body.firstChild);
+    } else if (state.background.type === "solid") {
+      // Clear any image background and apply solid color
+      body.style.backgroundImage = 'none';
       body.style.background = state.background.value;
+      body.style.filter = 'none';
     } else if (state.background.type === "gradient") {
+      // Clear any image background and apply gradient
+      body.style.backgroundImage = 'none';
       body.style.background = state.background.value;
-    } else if (
-      state.background.type === "pattern" &&
-      state.background.pattern
-    ) {
-      const pattern = BACKGROUND_PATTERNS[state.background.pattern];
-      if (pattern) {
-        body.style.background = `${colors.primary} ${pattern.css}`;
-        body.style.backgroundSize = pattern.size;
-      } else {
-        // Fallback to solid color if pattern is invalid
-        body.style.background = colors.primary;
-      }
+      body.style.filter = 'none';
     } else {
       // Default fallback
+      body.style.backgroundImage = 'none';
       body.style.background = colors.primary;
+      body.style.filter = 'none';
     }
   }, [
     state.currentPreset,
@@ -380,7 +387,6 @@ export const ThemeProvider = ({ children }) => {
 
     // Constants
     presets: THEME_PRESETS,
-    patterns: BACKGROUND_PATTERNS,
   };
 
   return (
