@@ -4,12 +4,29 @@ import MaskTextReveal from '../MaskTextReveal'
 import LinkCard from '../LinkCard'
 import { useScrollTrigger } from '../../hooks/useScrollTrigger'
 import { linksData } from '../../data/links'
-import { enhancedStorage } from '../../utils/enhancedStorage'
+// Simple localStorage helper
+const storage = {
+  get: (key, defaultValue = null) => {
+    try {
+      const item = localStorage.getItem(key)
+      return item ? JSON.parse(item) : defaultValue
+    } catch {
+      return defaultValue
+    }
+  },
+  set: (key, value) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value))
+    } catch (error) {
+      console.error('Failed to save to localStorage:', error)
+    }
+  }
+}
 
 const CuratedLinksSection = () => {
   const { ref: sectionRef, isVisible: sectionVisible } = useScrollTrigger({
-    threshold: 0.1,
-    rootMargin: '-100px',
+    threshold: 0.05,
+    rootMargin: '0px',
     once: true
   })
 
@@ -17,6 +34,7 @@ const CuratedLinksSection = () => {
   const [showAddForm, setShowAddForm] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [editingLink, setEditingLink] = useState(null)
+  const [forceVisible, setForceVisible] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     url: '',
@@ -24,32 +42,23 @@ const CuratedLinksSection = () => {
     category: 'Custom'
   })
 
-  // Load custom links from enhanced storage
+  // Load custom links from localStorage
   useEffect(() => {
-    const loadLinks = async () => {
-      try {
-        const savedLinks = await enhancedStorage.get('custom_links', { 
-          fallbackToBackup: true 
-        })
-        if (savedLinks) {
-          setCustomLinks(savedLinks)
-        }
-      } catch (error) {
-        console.error('Failed to load custom links:', error)
-      }
-    }
-
-    loadLinks()
+    const savedLinks = storage.get('custom_links', [])
+    setCustomLinks(savedLinks)
+    
+    // Fallback to make section visible after 1 second if scroll trigger doesn't work
+    const timer = setTimeout(() => {
+      setForceVisible(true)
+    }, 1000)
+    
+    return () => clearTimeout(timer)
   }, [])
 
-  // Save custom links to enhanced storage
-  const saveCustomLinks = async (links) => {
-    try {
-      await enhancedStorage.set('custom_links', links, { backup: true })
-      setCustomLinks(links)
-    } catch (error) {
-      console.error('Failed to save custom links:', error)
-    }
+  // Save custom links to localStorage
+  const saveCustomLinks = (links) => {
+    storage.set('custom_links', links)
+    setCustomLinks(links)
   }
 
   // Get all categories
@@ -124,7 +133,7 @@ const CuratedLinksSection = () => {
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
-          animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+          animate={(sectionVisible || forceVisible) ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
@@ -142,12 +151,12 @@ const CuratedLinksSection = () => {
         {/* Controls */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          animate={(sectionVisible || forceVisible) ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.4, delay: 0.3 }}
-          className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8"
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8"
         >
           {/* Category Filter */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             {allCategories.map(category => (
               <button
                 key={category}
@@ -166,12 +175,12 @@ const CuratedLinksSection = () => {
           {/* Add Link Button */}
           <button
             onClick={() => setShowAddForm(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-accent-1 hover:bg-accent-2 text-text-primary rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-accent-1 hover:bg-accent-2 text-text-primary rounded-lg transition-colors w-full sm:w-auto justify-center sm:justify-start"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Add Bookmark
+            <span className="whitespace-nowrap">Add Bookmark</span>
           </button>
         </motion.div>
 
@@ -188,14 +197,14 @@ const CuratedLinksSection = () => {
                 {editingLink ? 'Edit Bookmark' : 'Add New Bookmark'}
               </h3>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm text-gray-400 mb-2">Title</label>
                     <input
                       type="text"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent-1"
+                      className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent-1 text-sm"
                       placeholder="Link title"
                       required
                     />
@@ -206,7 +215,7 @@ const CuratedLinksSection = () => {
                       type="url"
                       value={formData.url}
                       onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent-1"
+                      className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent-1 text-sm"
                       placeholder="https://example.com"
                       required
                     />
@@ -217,7 +226,7 @@ const CuratedLinksSection = () => {
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent-1"
+                    className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent-1 text-sm"
                     placeholder="Brief description of the link"
                     rows={3}
                   />
@@ -228,21 +237,21 @@ const CuratedLinksSection = () => {
                     type="text"
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent-1"
+                    className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-accent-1 text-sm"
                     placeholder="Category name"
                   />
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     type="submit"
-                    className="px-6 py-2 bg-accent-1 hover:bg-accent-2 text-white rounded-lg transition-colors"
+                    className="px-6 py-2 bg-accent-1 hover:bg-accent-2 text-white rounded-lg transition-colors w-full sm:w-auto"
                   >
                     {editingLink ? 'Update' : 'Add'} Bookmark
                   </button>
                   <button
                     type="button"
                     onClick={resetForm}
-                    className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                    className="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors w-full sm:w-auto"
                   >
                     Cancel
                   </button>
@@ -256,7 +265,7 @@ const CuratedLinksSection = () => {
         {filteredCustomLinks.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            animate={(sectionVisible || forceVisible) ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.4, delay: 0.4 }}
             className="mb-12"
           >
@@ -302,7 +311,7 @@ const CuratedLinksSection = () => {
         {filteredCuratedLinks.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            animate={(sectionVisible || forceVisible) ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.4, delay: 0.5 }}
           >
             <h2 className="text-2xl font-heading text-white mb-6">Curated Links</h2>
@@ -325,7 +334,7 @@ const CuratedLinksSection = () => {
         {filteredCuratedLinks.length === 0 && filteredCustomLinks.length === 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            animate={(sectionVisible || forceVisible) ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.4, delay: 0.4 }}
             className="text-center py-12"
           >
@@ -342,7 +351,7 @@ const CuratedLinksSection = () => {
         {/* Footer Note */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          animate={(sectionVisible || forceVisible) ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, delay: 0.8 }}
           className="text-center mt-12 sm:mt-16"
         >

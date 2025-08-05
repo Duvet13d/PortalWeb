@@ -5,19 +5,13 @@ import {
   useLocation
 } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense } from 'react'
 import Header from './components/Header'
 import PageTransition from './components/PageTransition'
-
 import { ThemeProvider } from './contexts/ThemeContext'
 import useScrollToTop from './hooks/useScrollToTop'
 import useKeyboardShortcuts from './hooks/useKeyboardShortcuts'
 import { PageErrorBoundary } from './components/ErrorBoundary'
-import OfflineMode from './components/OfflineMode'
-import MigrationNotification from './components/MigrationNotification'
-import UpdateNotification from './components/UpdateNotification'
-import updateChecker from './utils/updateChecker'
-import { skipLinkUtils } from './utils/accessibility'
 
 // Lazy load pages for better performance
 const Home = lazy(() => import('./pages/Home'))
@@ -87,37 +81,13 @@ function AppContent() {
             <AnimatedRoutes />
           </PageErrorBoundary>
         </main>
-        <OfflineMode />
-        <MigrationNotification />
-        <UpdateNotification />
+
       </div>
     </>
   )
 }
 
 function App() {
-  // Register service worker for offline functionality
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
-        .then((registration) => {
-          console.log('Service Worker registered successfully:', registration)
-        })
-        .catch((error) => {
-          console.log('Service Worker registration failed:', error)
-        })
-    }
-  }, [])
-
-  // Add skip links for accessibility
-  useEffect(() => {
-    skipLinkUtils.createSkipLink('main-content', 'Skip to main content')
-  }, [])
-
-  // Initialize update checker
-  useEffect(() => {
-    updateChecker.initAutoCheck()
-  }, [])
 
   return (
     <PageErrorBoundary pageName="Application">

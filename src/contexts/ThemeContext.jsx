@@ -1,5 +1,23 @@
 import React, { createContext, useContext, useReducer, useEffect } from "react";
-import { enhancedStorage } from "../utils/enhancedStorage";
+
+// Simple localStorage helper
+const storage = {
+  get: (key, defaultValue = null) => {
+    try {
+      const item = localStorage.getItem(key)
+      return item ? JSON.parse(item) : defaultValue
+    } catch {
+      return defaultValue
+    }
+  },
+  set: (key, value) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value))
+    } catch (error) {
+      console.error('Failed to save to localStorage:', error)
+    }
+  }
+};
 
 // Theme presets
 export const THEME_PRESETS = {
@@ -35,8 +53,8 @@ export const THEME_PRESETS = {
       border: "#334155",
     },
     background: {
-      type: "gradient",
-      value: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+      type: "solid",
+      value: "#0f172a",
     },
   },
   FOREST_GREEN: {
@@ -53,8 +71,8 @@ export const THEME_PRESETS = {
       border: "#166534",
     },
     background: {
-      type: "gradient",
-      value: "linear-gradient(135deg, #0f1419 0%, #1a2332 50%, #064e3b 100%)",
+      type: "solid",
+      value: "#0f1419",
     },
   },
   PURPLE_HAZE: {
@@ -71,8 +89,8 @@ export const THEME_PRESETS = {
       border: "#6d28d9",
     },
     background: {
-      type: "gradient",
-      value: "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #581c87 100%)",
+      type: "solid",
+      value: "#1e1b4b",
     },
   },
   SUNSET_ORANGE: {
@@ -89,8 +107,8 @@ export const THEME_PRESETS = {
       border: "#ea580c",
     },
     background: {
-      type: "gradient",
-      value: "linear-gradient(135deg, #1c1917 0%, #292524 30%, #451a03 100%)",
+      type: "solid",
+      value: "#1c1917",
     },
   },
   MONOCHROME: {
@@ -189,24 +207,16 @@ const ThemeContext = createContext();
 export const ThemeProvider = ({ children }) => {
   const [state, dispatch] = useReducer(themeReducer, initialState);
 
-  // Load theme from enhanced storage on mount
+  // Load theme from localStorage on mount
   useEffect(() => {
-    const loadTheme = async () => {
-      try {
-        const savedTheme = await enhancedStorage.get("theme", { fallbackToBackup: true });
-        if (savedTheme) {
-          dispatch({
-            type: THEME_ACTIONS.LOAD_THEME,
-            payload: savedTheme,
-          });
-        } else {
-          dispatch({
-            type: THEME_ACTIONS.LOAD_THEME,
-            payload: {},
-          });
-        }
-      } catch (error) {
-        console.warn("Failed to load theme preferences:", error);
+    const loadTheme = () => {
+      const savedTheme = storage.get("theme");
+      if (savedTheme) {
+        dispatch({
+          type: THEME_ACTIONS.LOAD_THEME,
+          payload: savedTheme,
+        });
+      } else {
         dispatch({
           type: THEME_ACTIONS.LOAD_THEME,
           payload: {},
@@ -217,20 +227,16 @@ export const ThemeProvider = ({ children }) => {
     loadTheme();
   }, []);
 
-  // Save theme to enhanced storage whenever it changes
+  // Save theme to localStorage whenever it changes
   useEffect(() => {
-    const saveTheme = async () => {
+    const saveTheme = () => {
       if (state.isLoaded) {
-        try {
-          const themeData = {
-            currentPreset: state.currentPreset,
-            customColors: state.customColors,
-            background: state.background,
-          };
-          await enhancedStorage.set("theme", themeData, { backup: true });
-        } catch (error) {
-          console.warn("Failed to save theme preferences:", error);
-        }
+        const themeData = {
+          currentPreset: state.currentPreset,
+          customColors: state.customColors,
+          background: state.background,
+        };
+        storage.set("theme", themeData);
       }
     };
 
@@ -257,6 +263,21 @@ export const ThemeProvider = ({ children }) => {
     root.style.setProperty("--color-text", colors.text);
     root.style.setProperty("--color-text-secondary", colors.textSecondary);
     root.style.setProperty("--color-border", colors.border);
+
+    // Preserve scroll position during theme updates
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+    
+    // Gentle style recalculation without affecting scroll position
+    requestAnimationFrame(() => {
+      // Just trigger a gentle reflow without hiding the body
+      root.offsetHeight;
+      
+      // Restore scroll position if it changed
+      if (window.pageYOffset !== scrollTop || window.pageXOffset !== scrollLeft) {
+        window.scrollTo(scrollLeft, scrollTop);
+      }
+    });
 
     // Debug log to verify colors are being applied
     console.log('Theme colors applied:', colors);
@@ -310,11 +331,6 @@ export const ThemeProvider = ({ children }) => {
       document.body.insertBefore(bgLayer, document.body.firstChild);
     } else if (state.background.type === "solid") {
       // Clear any image background and apply solid color
-      body.style.backgroundImage = 'none';
-      body.style.background = state.background.value;
-      body.style.filter = 'none';
-    } else if (state.background.type === "gradient") {
-      // Clear any image background and apply gradient
       body.style.backgroundImage = 'none';
       body.style.background = state.background.value;
       body.style.filter = 'none';

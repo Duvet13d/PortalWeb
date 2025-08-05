@@ -9,21 +9,10 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 100",
     "preview": "vite preview",
     "test": "vitest",
-    "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "test:performance": "lighthouse-ci autorun",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist",
-    "build:chrome-extension": "npm run build && npm run copy:chrome-extension && npm run package:chrome",
-    "build:firefox-extension": "npm run build && npm run copy:firefox-extension && npm run package:firefox",
-    "copy:chrome-extension": "node scripts/build-chrome-extension.js",
-    "copy:firefox-extension": "node scripts/build-firefox-extension.js",
-    "package:chrome": "node scripts/package-chrome.js",
-    "package:firefox": "node scripts/package-firefox.js",
-    "clean:extensions": "node scripts/clean-extensions.js"
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "axios": "^1.6.2",
@@ -33,16 +22,8 @@
     "react-router-dom": "^6.20.1"
   },
   "devDependencies": {
-    "@lhci/cli": "^0.12.0",
-    "@playwright/test": "^1.40.1",
-    "@testing-library/jest-dom": "^6.1.5",
-    "@testing-library/react": "^14.1.2",
-    "@testing-library/user-event": "^14.5.1",
-    "@types/react": "^18.2.43",
-    "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^4.2.1",
     "@vitest/coverage-v8": "^1.0.4",
-    "@vitest/ui": "^1.0.4",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.55.0",
     "eslint-plugin-react": "^7.33.2",
@@ -50,10 +31,8 @@
     "eslint-plugin-react-refresh": "^0.4.5",
     "gh-pages": "^6.1.1",
     "jsdom": "^23.0.1",
-    "msw": "^2.0.11",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.3.6",
-    "terser": "^5.43.1",
     "vite": "^5.0.8",
     "vitest": "^1.0.4"
   }

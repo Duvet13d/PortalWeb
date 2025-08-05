@@ -1,7 +1,24 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { enhancedStorage } from "../../utils/enhancedStorage";
-import { ariaUtils, keyboardUtils, focusUtils } from "../../utils/accessibility";
+
+// Simple localStorage helper
+const storage = {
+  get: (key, defaultValue = null) => {
+    try {
+      const item = localStorage.getItem(key)
+      return item ? JSON.parse(item) : defaultValue
+    } catch {
+      return defaultValue
+    }
+  },
+  set: (key, value) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value))
+    } catch (error) {
+      console.error('Failed to save to localStorage:', error)
+    }
+  }
+};
 
 /**
  * Notes Tool - Full-featured note-taking with markdown support for the Tools page
@@ -22,47 +39,25 @@ const Notes = () => {
   const textareaRef = useRef(null);
   const autoSaveRef = useRef(null);
 
-  // Load notes from enhanced storage on mount
+  // Load notes from localStorage on mount
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const savedNotes = await enhancedStorage.get("personal_notes", { 
-          fallbackToBackup: true,
-          // Notes are considered sensitive and may be encrypted
-          password: undefined // Will be handled by the storage system
-        });
-        const savedSettings = await enhancedStorage.get("notes_settings", { 
-          fallbackToBackup: true 
-        });
+    const savedNotes = storage.get("personal_notes", []);
+    const savedSettings = storage.get("notes_settings", {});
 
-        if (savedNotes) {
-          setNotes(savedNotes);
-          if (savedNotes.length > 0) {
-            setSelectedNoteId(savedNotes[0].id);
-            setCurrentNote(savedNotes[0].content);
-          }
-        }
+    if (savedNotes.length > 0) {
+      setNotes(savedNotes);
+      setSelectedNoteId(savedNotes[0].id);
+      setCurrentNote(savedNotes[0].content);
+    }
 
-        if (savedSettings) {
-          setAutoSave(savedSettings.autoSave !== false);
-          setShowToolbar(savedSettings.showToolbar !== false);
-        }
-      } catch (error) {
-        console.error("Failed to load notes:", error);
-      }
-    };
-
-    loadData();
+    setAutoSave(savedSettings.autoSave !== false);
+    setShowToolbar(savedSettings.showToolbar !== false);
   }, []);
 
-  // Save settings to enhanced storage
-  const saveSettings = useCallback(async () => {
-    try {
-      const settings = { autoSave, showToolbar };
-      await enhancedStorage.set("notes_settings", settings, { backup: true });
-    } catch (error) {
-      console.error("Failed to save settings:", error);
-    }
+  // Save settings to localStorage
+  const saveSettings = useCallback(() => {
+    const settings = { autoSave, showToolbar };
+    storage.set("notes_settings", settings);
   }, [autoSave, showToolbar]);
 
   // Save settings when they change
@@ -72,15 +67,12 @@ const Notes = () => {
 
   // Auto-save functionality
   const saveNotes = useCallback(
-    async (notesToSave) => {
+    (notesToSave) => {
       if (!autoSave) return;
 
       setIsSaving(true);
       try {
-        await enhancedStorage.set("personal_notes", notesToSave, { 
-          backup: true,
-          // Notes are sensitive and will be encrypted if encryption is enabled
-        });
+        storage.set("personal_notes", notesToSave);
         setLastSaved(new Date());
       } catch (error) {
         console.error("Failed to save notes:", error);
@@ -423,9 +415,9 @@ const Notes = () => {
       </AnimatePresence>
 
       {/* Main Content */}
-      <div className="flex gap-6 h-[600px]">
+      <div className="flex flex-col lg:flex-row gap-6 h-auto lg:h-[600px] min-h-[400px]">
         {/* Notes List */}
-        <div className="w-80 border-r border-gray-700 pr-6">
+        <div className="w-full lg:w-80 lg:border-r border-gray-700 lg:pr-6 lg:border-b-0 border-b pb-6 lg:pb-0">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-medium text-white">All Notes</h3>
             <button
@@ -438,7 +430,7 @@ const Notes = () => {
           </div>
 
           <div 
-            className="space-y-3 overflow-y-auto h-full"
+            className="space-y-3 overflow-y-auto h-full max-h-48 lg:max-h-full"
             role="listbox"
             aria-label="Notes list"
           >
@@ -462,7 +454,12 @@ const Notes = () => {
                 <div
                   key={note.id}
                   onClick={() => selectNote(note.id)}
-                  onKeyDown={(e) => keyboardUtils.handleActivation(e, () => selectNote(note.id))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      selectNote(note.id);
+                    }
+                  }}
                   className={`p-4 rounded-lg cursor-pointer transition-colors group focus:outline-none focus:ring-2 focus:ring-accent-1 ${
                     selectedNoteId === note.id
                       ? "bg-accent-1/20 border border-accent-1/30"
@@ -492,7 +489,7 @@ const Notes = () => {
                       onClick={(e) => {
                         e.stopPropagation();
                         deleteNote(note.id);
-                        ariaUtils.announce(`Note "${note.title}" deleted`);
+                        // Note deleted
                       }}
                       className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1 text-red-400 hover:text-red-300 transition-all ml-2 focus:outline-none focus:ring-2 focus:ring-red-500 rounded"
                       aria-label={`Delete note: ${note.title}`}
@@ -520,11 +517,11 @@ const Notes = () => {
         </div>
 
         {/* Note Editor */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-h-0">
           {/* Formatting Toolbar */}
           {showToolbar && (
-            <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-700">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 pb-4 border-b border-gray-700 gap-4 sm:gap-0">
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
                   onClick={() => insertMarkdown("bold")}
                   className="p-2 text-gray-400 hover:text-white hover:bg-gray-800/50 rounded transition-colors"
@@ -637,7 +634,7 @@ const Notes = () => {
 
               <button
                 onClick={() => setPreviewMode(!previewMode)}
-                className={`px-3 py-1 rounded transition-colors ${
+                className={`px-3 py-1 rounded transition-colors text-sm ${
                   previewMode
                     ? "bg-accent-1 text-white"
                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -651,7 +648,8 @@ const Notes = () => {
           {/* Editor/Preview */}
           {previewMode ? (
             <div
-              className="flex-1 p-6 bg-gray-800/30 rounded-lg overflow-y-auto text-gray-300 leading-relaxed prose prose-invert max-w-none"
+              className="flex-1 p-4 sm:p-6 bg-gray-800/30 rounded-lg overflow-y-auto overflow-x-hidden text-gray-300 leading-relaxed prose prose-invert max-w-none min-h-[300px] lg:min-h-0"
+              style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
               dangerouslySetInnerHTML={{
                 __html: renderMarkdownPreview(currentNote),
               }}
@@ -666,7 +664,7 @@ const Notes = () => {
                   ? "Start writing your note... Use markdown for formatting!"
                   : "Create a new note to get started"
               }
-              className="flex-1 w-full p-6 bg-gray-800/30 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-accent-1 focus:ring-2 focus:ring-accent-1/20 transition-all duration-300 resize-none font-mono text-sm leading-relaxed"
+              className="flex-1 w-full p-4 sm:p-6 bg-gray-800/30 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-accent-1 focus:ring-2 focus:ring-accent-1/20 transition-all duration-300 resize-none font-mono text-sm leading-relaxed min-h-[300px] lg:min-h-0"
               disabled={!selectedNoteId}
             />
           )}
@@ -677,7 +675,7 @@ const Notes = () => {
               <summary className="hover:text-gray-400 transition-colors">
                 Markdown formatting help
               </summary>
-              <div className="mt-3 grid grid-cols-3 gap-4 p-4 bg-gray-800/30 rounded-lg">
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-gray-800/30 rounded-lg">
                 <div>
                   <code>**bold**</code> → <strong>bold</strong>
                 </div>
