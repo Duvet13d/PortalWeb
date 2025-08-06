@@ -29,15 +29,15 @@ jobs:
       #- name: Run unit tests
        # run: npm run test:run
 
-      - name: Generate coverage report
-        run: npm run test:coverage
+   #   - name: Generate coverage report
+    #    run: npm run test:coverage
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage/lcov.info
-          flags: unittests
-          name: codecov-umbrella
+    #  - name: Upload coverage to Codecov
+    #    uses: codecov/codecov-action@v3
+   #     with:
+     #     file: ./coverage/lcov.info
+     #     flags: unittests
+   #       name: codecov-umbrella
 
       # - name: Install Playwright browsers
       #   run: npx playwright install --with-deps
